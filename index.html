@@ -148,15 +148,15 @@ obsolete now."></textarea>
         message += ": " + txTitle.value;
 
         if(hasBody){
-          message += "\n\n";
-          if(cbBreaking.checked && txBreaking.value.length > 0) { message += "BREAKING CHANGE: " + txBreaking.value + "\n"; }
-          if(taBody.value.length > 0) { message += taBody.value; }
+          message += "\n";
+          if(cbBreaking.checked && txBreaking.value.length > 0) { message += "\nBREAKING CHANGE: " + txBreaking.value; }
+          if(taBody.value.length > 0) { message += "\n" + taBody.value; }
         }
 
         if(hasReference) {
-          message += "\n\n";
-          if(txRef.value.length > 0) { message += "Refs: " + txRef.value + "\n"; }
-          if(txTicket.value.length > 0) { message += "#" + txTicket.value; }
+          message += "\n";
+          if(txRef.value.length > 0) { message += "\nRefs: " + txRef.value; }
+          if(txTicket.value.length > 0) { message += "\n#" + txTicket.value; }
         }
 
         taOutput.value = message;
