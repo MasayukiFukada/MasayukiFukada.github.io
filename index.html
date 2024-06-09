@@ -19,6 +19,7 @@
               <textarea id="ta_output" class="textarea is-success" readonly style="height: 700px;"></textarea>
             </div>
             <div class="card-footer">
+              <a href="#" class="card-footer-item" onclick="clearForm()">clear</a>
               <a href="#" class="card-footer-item has-background-primary-light has-text-link" onclick="copyToClipboard()">Copy to Clipboard</a>
             </div>
           </div>
@@ -169,6 +170,18 @@ obsolete now."></textarea>
         navigator.clipboard.writeText(sourceText.value);
 
         alert("Copied the text");
+      }
+
+      function clearForm() {
+        rbTypes[0].checked = true;
+        txScope.value = "";
+        txTitle.value = "";
+        cbBreaking.checked = false;
+        txBreaking.value = "";
+        taBody.value = "";
+        txRef.value = "";
+        txTicket.value = "";
+        taOutput.value = "";
       }
     </script>
   </body>
