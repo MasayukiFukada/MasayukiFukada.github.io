@@ -18,6 +18,9 @@
             <div class="card-content">
               <textarea id="ta_output" class="textarea is-success" readonly style="height: 700px;"></textarea>
             </div>
+            <div class="card-footer">
+              <a href="#" class="card-footer-item has-background-primary-light has-text-link" onclick="copyToClipboard()">Copy to Clipboard</a>
+            </div>
           </div>
         </div>
         <div class="column">
@@ -142,6 +145,15 @@ obsolete now."></textarea>
         }
 
         taOutput.value = message;
+      }
+
+      function copyToClipboard() {
+        var sourceText = document.getElementById("ta_output");
+        sourceText.select();
+        sourceText.setSelectionRange(0, 99999); // For mobile devices
+        navigator.clipboard.writeText(sourceText.value);
+
+        alert("Copied the text");
       }
     </script>
   </body>
