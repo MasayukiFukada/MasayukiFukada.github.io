@@ -1,6 +1,6 @@
-# MasayukiFukada.github.io
+# [Main Page](https://masayukifukada.github.io/)
 
-## 簡易確認
+## Check local
 
 ``
 python -m http.server 8000
