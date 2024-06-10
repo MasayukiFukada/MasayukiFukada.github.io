@@ -6,6 +6,8 @@
     <title>Conventional Commit Message Generator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.1/css/bulma.min.css">
     <link href="https://use.fontawesome.com/releases/v6.5.2/css/all.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   </head>
   <body>
     <div id="app" class="section" style="min-height: 100vh;">
@@ -169,7 +171,21 @@ obsolete now."></textarea>
         sourceText.setSelectionRange(0, 99999); // For mobile devices
         navigator.clipboard.writeText(sourceText.value);
 
-        alert("Copied the text");
+        // thanks! : https://github.com/apvarun/toastify-js
+        Toastify({
+          text: "Copied the text",
+          duration: 2000,
+          // destination: "https://github.com/apvarun/toastify-js",
+          newWindow: true,
+          close: true,
+          gravity: "bottom", // `top` or `bottom`
+          position: "left", // `left`, `center` or `right`
+          stopOnFocus: true, // Prevents dismissing of toast on hover
+          style: {
+            background: "linear-gradient(to right, #00b09b, #96c93d)",
+          },
+          onClick: function(){} // Callback after click
+        }).showToast();
       }
 
       function clearForm() {
