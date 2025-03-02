@@ -1,8 +1,5 @@
 # [Main Page](https://masayukifukada.github.io/)
 
-## Check local
+## Deploy local machine
 
-``
-python -m http.server 8000
-```
-
+1. exec `run_server.sh`
