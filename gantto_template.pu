@@ -1,0 +1,79 @@
+@startgantt
+
+<style>
+ganttDiagram {
+  FontColor #000000FF
+  FontSize 16
+  task {
+    FontColor #000000FF
+    BackGroundColor #0055AAFF-00FFAAFF
+    LineColor #003300FF
+    unstarted {
+      FontColor #FF0000FF
+      FontStyle Bold
+      BackGroundColor #7700FFFF/EE0000FF
+      LineColor #FF0000FF
+    }
+  }
+}
+</style>
+
+language ja
+' 休日は closed 扱いせずに色変更だけ
+saturday are colored in LightCyan
+sunday are colored in LightCyan
+
+' 開始日を見やすい位置に指定する
+Project starts 2024-03-01
+' 開始日をリアルタイムに追従する場合は組み込み関数もある
+'!$now = %now()
+'!$past = %date("YYYY-MM-dd", $now - 14*24*3600)
+'Project starts $past
+
+title Today is %date("YYYY-MM-dd")
+
+' テンプレートの説明の便宜上、今日を 2024-03-15 とする
+Today is 2024-03-15 and is colored in DodgerBlue
+' リアルタイムで今日を追従する場合は色指定だけで日付を指定しない
+'Today is colored in DodgerBlue
+
+' 直近の祝日一覧
+' 春分の日
+2024-03-20 is colored in LightCyan
+
+[○○プロジェクト全体の計画] as [ALL] is colored in #FFFFFFFF/#000000FF
+[ALL] starts 2024-03-01 and ends 2024-04-01
+note bottom
+言語: XXXX
+ＤＢ: XXXX
+end note
+-- 区切り線 ( 例）フェーズ２ ) --
+
+' 自分ルール
+' ・計画は Pmmddxx のエイリアスとし、xx は後から間に割り込めるように 10 単位とする
+' ・計画は順番がある場合は制約を設定して明確にする
+' ・実施は計画のタスク名の先頭に「 _ 」を付けて表現する
+' ・実施は間に他の計画が割り込まれない場合は、計画のすぐ下に作る
+' ・実施は制約を設定せずに、実際の実施を記録する ( 前倒しなどが分かりやすいように )
+' ・実施は必ず starts と ends にする(相対の指定はしない)
+' ・実施は担当をアサインする
+' ・進行形のタスクは今日の日付を ends に設定する ( ここでは 3/14 )
+[機能A] as [P10] is colored in #AAAAAAFF/000000FF and starts 2024-03-05 and ends 2024-03-11
+[_機能A] as [I10] on {自分} starts 2024-03-05 and ends 2024-03-11 and is 100% completed
+' 今日の日付がまだ完了予定日よりも前の場合は、完了は相対指定で良い
+[機能B] as [P20] is colored in #AAAAAAFF/000000FF and starts at [P10]'s end and requires 5 days
+' 機能Bは進行形で作り中なので今日の日付までとする
+[機能Bの調査] as [P21] is colored in #AAAAAAFF/000000FF and starts 2024-03-09 and ends 2024-03-10
+[_機能Bの調査] as [I21] on {自分} starts 2024-03-09 and ends 2024-03-10 and is 100% completed
+[機能Bの準備] as [P22] is colored in #AAAAAAFF/000000FF and starts 2024-03-11 and ends 2024-03-12
+[_機能Bの準備] as [I22] on {自分} starts 2024-03-11 and ends 2024-03-13 and is 100% completed
+' 機能Bは間に作業が割り込んだので実施がここまでズレこんだ
+[_機能B] as [I20] on {自分} starts 2024-03-13 and ends 2024-03-15 and is 80% completed
+[機能C] as [P30] is colored in #AAAAAAFF/000000FF and starts at [P20]'s end and requires 3 days
+[機能の実装] as [M1] happens at 2024-03-21
+
+-- 割り込み --
+' こういう関係の無い割り込みもある
+[_外部の作業] on {自分} starts 2024-03-12 and ends 2024-03-13 and is 100% completed
+@endgantt
+

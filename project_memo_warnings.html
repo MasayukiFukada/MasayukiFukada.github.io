@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Masayuki Fukada GitHub page</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.1/css/bulma.min.css"
+    />
+  </head>
+  <body>
+    <h1>ワーニングをエラーとして扱う</h1>
+    <div class="content">
+      <ul>
+        <li>
+          関連する理論や原則
+          <ul>
+            <li>
+              <label class="has-text-link has-text-weight-bold"
+                >割れ窓理論</label
+              >
+              <ul>
+                <li>アメリカの犯罪学者ジョージ・ケリングが考案</li>
+                <li>
+                  軽微な犯罪も徹底的に取り締まることで、凶悪犯罪を含めた犯罪を抑止できるとする環境犯罪学上の理論
+                </li>
+                <li>
+                  1枚の割れた窓ガラスをそのままにしていると、さらに割られる窓ガラスが増え、いずれ街全体が荒廃してしまうという理論
+                </li>
+                <li>
+                  プロジェクト開始時にワーニングが1件残っていたとする。あなたの作業後に2件増えたとすると、ワーニングは最初の3倍になる。これはマズイ。
+                  <ul>
+                    <li>
+                      しかし、プロジェクトが最初から大量(数百〜数千件)のワーニングが残っていたとしたら、あなたの追加したワーニングは1%にも満たない些細なものに感じられる。
+                    </li>
+                    <li>
+                      つまり放置されたままのワーニングが増えると、作業の結果ワーニングが増えたとしても気にならなくなってしまう。
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  ⇒ 「<label class="has-text-weight-bold is-underlined"
+                    >今回の作業に関係無い範囲は修正しなくても良い</label
+                  >」とプロジェクトリーダーが言う様なプロジェクトは<label
+                    class="has-text-danger has-text-weight-bold"
+                    >要注意</label
+                  >
+                  <ul>
+                    <li>
+                      ...とは言えテストコードが無い場合はバグを新たに生む可能性もあり、多少Gは仕方ない部分でもある
+                    </li>
+                    <li>⇒ 普段からテストコードをちゃんと書く</li>
+                    <li>⇒ テストコードを書いて既存の動作を確かめてから直す</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <label class="has-text-link has-text-weight-bold">
+                ボーイスカウトの原則</label
+              >
+              <ul>
+                <li>
+                  「<label class="has-text-weight-bold is-underlined"
+                    >来た時よりも美しく</label
+                  >」のルール
+                </li>
+                <li>
+                  自分が作業する前よりも作業した後の方がソースコードが綺麗になっている状態を目指す
+                  <ul>
+                    <li>
+                      上記の割れ窓理論とも関連。自分の作業と直接関係が無くてもワーニングが出ていたら直す
+                    </li>
+                    <li>修正内容が心配ならコミットを分けておく</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          対策
+          <ul>
+            <li>
+              <label class="has-text-success has-text-weight-bold">
+                プロジェクトの最初の１週間程度は既存のコードの構造、ルールを理解・修正・最新化するための期間として工数を見積もる
+              </label>
+              <ul>
+                <li>勿論プロジェクトの規模によって期間は調整が必要</li>
+              </ul>
+            </li>
+            <li>
+              <label class="has-text-success has-text-weight-bold">
+                可能ならワーニングをエラーとして扱う(ビルドを失敗判定にするなど、ワーニングを放置して作業を進められないように)ように設定
+              </label>
+              <ul>
+                <li>
+                  インデントの違い(タブ <-->
+                  スペース)なども消すようにしたりと、コードスタイル系も正す施策があると尚良い
+                </li>
+              </ul>
+            </li>
+            <li>
+              <label class="has-text-success has-text-weight-bold">
+                エラー/ワーニングともに
+                0件であることをルールとする(又は、どうしても無くせないものはドキュメントに記載する)
+              </label>
+              <ul>
+                <li>「来た時より悪くしない」のが最低限の譲歩</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </body>
+</html>

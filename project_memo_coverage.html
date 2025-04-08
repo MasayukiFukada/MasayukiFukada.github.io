@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Masayuki Fukada GitHub page</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.1/css/bulma.min.css"
+    />
+  </head>
+  <body>
+    <h1>カバレッジとパレートの法則</h1>
+    <div class="content">
+      <ul>
+        <li>
+          <label class="has-text-link has-text-weight-bold"
+            >パレートの法則</label
+          >
+          <ul>
+            <li>
+              全体の成果の8割が全体の2割の要素によって生み出されているという経験則
+            </li>
+            <li>
+              全体の２割を改善すれば８割が良くなる可能性があるので、どこが該当する２割か見極める
+              <ul>
+                <li>不具合・障害がどこに集中しているかを知る</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          対策
+          <ul>
+            <li>
+              <label class="has-text-success has-text-weight-bold"
+                >過度なカバレッジを目指さない</label
+              >
+              <ul>
+                <li>
+                  カバレッジ 70%
+                  などを目指すと、「単純なセッターのテスト」の様な効果の薄いテストも行われがち
+                </li>
+                <li>
+                  単純なものを除き、全体に対し重要なロジックを２割以上テストしていれば上等と捉える
+                </li>
+              </ul>
+            </li>
+            <li>
+              <label class="has-text-success has-text-weight-bold"
+                >効率的で効果的なテストを行う</label
+              >
+              <ul>
+                <li>
+                  データや条件により変化が起こる部分(分岐や繰り返し)が行われている処理に対象を絞る
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </body>
+</html>
