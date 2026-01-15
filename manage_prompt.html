@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロンプト管理</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            margin: 0;
+        }
+        .sidebar {
+            width: 300px;
+            border-right: 1px solid #ddd;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        h2 {
+            margin-top: 0;
+            font-size: 1.2em;
+            color: #333;
+        }
+        #category-selector {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+        }
+        #prompt-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        #prompt-list li {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #prompt-list li:hover, #prompt-list li.active {
+            background-color: #e9ecef;
+        }
+        .editor {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .editor .form-group {
+            margin-bottom: 15px;
+        }
+        .editor label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .editor input[type="text"], .editor textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .editor textarea {
+            flex-grow: 1;
+            resize: vertical;
+            min-height: 200px;
+        }
+        .button-group {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .io-buttons {
+            margin-top: auto;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>カテゴリ</h2>
+        <select id="category-selector"></select>
+
+        <h2>プロンプト一覧</h2>
+        <ul id="prompt-list">
+            <!-- JavaScriptによってプロンプトがここに表示されます -->
+        </ul>
+        <div class="io-buttons button-group">
+            <button id="import-btn">インポート (JSON)</button>
+            <input type="file" id="import-file" accept=".json" style="display: none;">
+            <button id="export-btn">エクスポート (JSON)</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="editor">
+            <div class="main-controls button-group">
+                <button id="save-btn">保存</button>
+                <button id="new-btn" style="background-color: #28a745;">新規作成</button>
+                <button id="delete-btn" style="background-color: #dc3545; margin-left: auto;">削除</button>
+            </div>
+
+            <div class="form-group">
+                <label for="prompt-category-edit">カテゴリ:</label>
+                <input type="text" id="prompt-category-edit" placeholder="プロンプトのカテゴリ">
+            </div>
+
+            <div class="form-group">
+                <label for="prompt-title">タイトル:</label>
+                <input type="text" id="prompt-title" placeholder="プロンプトのタイトル">
+            </div>
+
+            <div class="form-group" style="flex-grow: 1; display: flex; flex-direction: column;">
+                <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                    <label for="prompt-text" style="margin: 0; font-weight: bold;">プロンプト:</label>
+                    <button id="copy-btn" style="background-color: #6c757d; padding: 5px 10px; font-size: 0.8em; margin-left: 10px;">クリップボードにコピー</button>
+                </div>
+                <textarea id="prompt-text" placeholder="ここにプロンプトを入力"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // UI要素の取得
+            const categorySelector = document.getElementById('category-selector');
+            const promptList = document.getElementById('prompt-list');
+            const promptCategoryEdit = document.getElementById('prompt-category-edit');
+            const promptTitle = document.getElementById('prompt-title');
+            const promptText = document.getElementById('prompt-text');
+            const saveBtn = document.getElementById('save-btn');
+            const newBtn = document.getElementById('new-btn');
+            const deleteBtn = document.getElementById('delete-btn');
+            const copyBtn = document.getElementById('copy-btn');
+            const importBtn = document.getElementById('import-btn');
+            const importFile = document.getElementById('import-file');
+            const exportBtn = document.getElementById('export-btn');
+
+            // --- データ管理 ---
+            let prompts = JSON.parse(localStorage.getItem('prompts')) || [
+                { id: 1, category: 'コーディング', title: 'Pythonクラス作成', prompt: 'Pythonで指定した機能を持つクラスを作成してください。' },
+                { id: 2, category: 'コーディング', title: 'JS非同期処理', prompt: 'JavaScriptでPromiseを使った非同期処理を実装する方法を教えてください。' },
+                { id: 3, category: 'アイデア出し', title: '新しいSNSのアイデア', prompt: '10代の若者をターゲットにした、新しいSNSのユニークなアイデアを5つ提案してください。' },
+                { id: 4, category: '文章作成', title: 'ブログ記事のタイトル', prompt: '「AIと未来」というテーマで、読者の興味を引くブログ記事のタイトルを10個作成してください。' }
+            ];
+            let nextId = prompts.length > 0 ? Math.max(...prompts.map(p => p.id)) + 1 : 1;
+            let currentPromptId = null;
+
+            // --- 関数定義 ---
+
+            function persistData() {
+                localStorage.setItem('prompts', JSON.stringify(prompts));
+            }
+
+            function renderCategories() {
+                const categories = [...new Set(prompts.map(p => p.category))].sort();
+                const currentCategory = categorySelector.value;
+                categorySelector.innerHTML = '<option value="">すべてのカテゴリ</option>';
+                categories.forEach(category => {
+                    if (category) { // 空のカテゴリは追加しない
+                        const option = document.createElement('option');
+                        option.value = category;
+                        option.textContent = category;
+                        categorySelector.appendChild(option);
+                    }
+                });
+                categorySelector.value = currentCategory;
+            }
+
+            function renderPrompts() {
+                const selectedCategory = categorySelector.value;
+                const filteredPrompts = selectedCategory
+                    ? prompts.filter(p => p.category === selectedCategory)
+                    : prompts;
+
+                promptList.innerHTML = '';
+                filteredPrompts.forEach(p => {
+                    const li = document.createElement('li');
+                    li.textContent = p.title;
+                    li.dataset.id = p.id;
+                    if (p.id === currentPromptId) {
+                        li.classList.add('active');
+                    }
+                    li.addEventListener('click', () => {
+                        loadPrompt(p.id);
+                    });
+                    promptList.appendChild(li);
+                });
+            }
+
+            function loadPrompt(id) {
+                const prompt = prompts.find(p => p.id === id);
+                if (prompt) {
+                    currentPromptId = id;
+                    promptCategoryEdit.value = prompt.category;
+                    promptTitle.value = prompt.title;
+                    promptText.value = prompt.prompt;
+                    renderPrompts(); 
+                }
+            }
+            
+            function clearEditor() {
+                currentPromptId = null;
+                promptCategoryEdit.value = '';
+                promptTitle.value = '';
+                promptText.value = '';
+                renderPrompts();
+            }
+
+            function createNewPrompt() {
+                const selectedCategory = categorySelector.value || '未分類';
+                const newPrompt = {
+                    id: nextId++,
+                    category: selectedCategory,
+                    title: '新規プロンプト',
+                    prompt: ''
+                };
+                prompts.push(newPrompt);
+                persistData();
+                
+                if (![...categorySelector.options].some(opt => opt.value === selectedCategory)) {
+                   renderCategories();
+                }
+                categorySelector.value = selectedCategory;
+                loadPrompt(newPrompt.id);
+            }
+
+            function savePrompt() {
+                if (currentPromptId === null) {
+                    alert('保存するプロンプトが選択されていません。新規作成するか、一覧から選択してください。');
+                    return;
+                }
+                const prompt = prompts.find(p => p.id === currentPromptId);
+                if (prompt) {
+                    prompt.category = promptCategoryEdit.value.trim() || '未分類';
+                    prompt.title = promptTitle.value.trim() || '無題';
+                    prompt.prompt = promptText.value;
+                    persistData();
+                    renderCategories();
+                    renderPrompts(); 
+                    alert('プロンプトを保存しました。');
+                }
+            }
+
+            function deletePrompt() {
+                if (currentPromptId === null) {
+                    alert('削除するプロンプトが選択されていません。');
+                    return;
+                }
+                if (confirm('本当にこのプロンプトを削除しますか？')) {
+                    prompts = prompts.filter(p => p.id !== currentPromptId);
+                    persistData();
+                    clearEditor();
+                    renderCategories();
+                    renderPrompts();
+                    alert('プロンプトを削除しました。');
+                }
+            }
+
+            function copyToClipboard() {
+                const textToCopy = promptText.value;
+                if (!textToCopy) {
+                    alert('コピーする内容がありません。');
+                    return;
+                }
+
+                // navigator.clipboardがセキュアなコンテキスト(HTTPS, localhost)でのみ利用可能
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        const originalText = copyBtn.textContent;
+                        copyBtn.textContent = 'コピーしました！';
+                        setTimeout(() => {
+                            copyBtn.textContent = originalText;
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('クリップボードへのコピーに失敗しました:', err);
+                        alert('コピーに失敗しました。');
+                    });
+                } else {
+                    // 非セキュアなコンテキスト(file://など)用のフォールバック
+                    const textArea = document.createElement("textarea");
+                    textArea.value = textToCopy;
+                    textArea.style.position = "fixed"; 
+                    textArea.style.left = "-9999px";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                        const successful = document.execCommand('copy');
+                        if (successful) {
+                            const originalText = copyBtn.textContent;
+                            copyBtn.textContent = 'コピーしました！';
+                            setTimeout(() => {
+                                copyBtn.textContent = originalText;
+                            }, 2000);
+                        } else {
+                            alert('コピーに失敗しました。');
+                        }
+                    } catch (err) {
+                        console.error('フォールバックコピーに失敗しました:', err);
+                        alert('コピーに失敗しました。');
+                    }
+                    document.body.removeChild(textArea);
+                }
+            }
+
+            function exportData() {
+                if (prompts.length === 0) {
+                    alert('エクスポートするデータがありません。');
+                    return;
+                }
+                const dataStr = JSON.stringify(prompts, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `prompts_${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            function importData(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (Array.isArray(imported) && imported.every(p => 'category' in p && 'title' in p && 'prompt' in p)) {
+                            if (confirm('現在のプロンプトは上書きされます。よろしいですか？')) {
+                                let maxId = prompts.length > 0 ? Math.max(...prompts.map(p => p.id)) : 0;
+                                imported.forEach(p => {
+                                    if (!p.id) {
+                                        p.id = ++maxId;
+                                    }
+                                });
+                                prompts = imported;
+                                nextId = Math.max(...prompts.map(p => p.id)) + 1;
+                                persistData();
+                                clearEditor();
+                                renderCategories();
+                                renderPrompts();
+                                alert('プロンプトをインポートしました。');
+                            }
+                        } else {
+                            alert('ファイル形式が無効です。カテゴリ、タイトル、プロンプトのキーを持つオブジェクトの配列である必要があります。');
+                        }
+                    } catch (error) {
+                        alert('ファイルの読み込みに失敗しました。JSON形式が正しいか確認してください。');
+                        console.error(error);
+                    } finally {
+                        importFile.value = '';
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            // --- イベントリスナー ---
+            categorySelector.addEventListener('change', renderPrompts);
+            newBtn.addEventListener('click', createNewPrompt);
+            saveBtn.addEventListener('click', savePrompt);
+            deleteBtn.addEventListener('click', deletePrompt);
+            copyBtn.addEventListener('click', copyToClipboard);
+            exportBtn.addEventListener('click', exportData);
+            importBtn.addEventListener('click', () => importFile.click());
+            importFile.addEventListener('change', importData);
+
+            // --- 初期化処理 ---
+            renderCategories();
+            renderPrompts();
+        });
+    </script>
+
+</body>
+</html>
