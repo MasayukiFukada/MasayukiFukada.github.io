@@ -1,0 +1,61 @@
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Back of Flyer Memo</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="manifest" href="./manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Back of Flyer Memo">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+  <header>
+    <h1>Back of Flyer Memo</h1>
+  </header>
+  <main>
+    <ul id="memo-list"></ul>
+  </main>
+
+  <button class="fab" id="action-button"><span class="material-icons">add</span></button>
+
+  <div id="memo-popup" class="popup-overlay">
+    <div class="popup-content">
+      <form id="memo-form">
+        <label for="memo-title">タイトル:</label>
+        <input type="text" id="memo-title" required>
+
+        <label>カテゴリ:</label>
+        <div id="memo-category-radio" class="category-radio-group">
+          <input type="radio" id="category-0" name="memo-category" value="0" checked>
+          <label for="category-0" class="category-label"><span class="material-icons">payments</span></label>
+
+          <input type="radio" id="category-1" name="memo-category" value="1">
+          <label for="category-1" class="category-label"><span class="material-icons">numbers</span></label>
+
+          <input type="radio" id="category-2" name="memo-category" value="2">
+          <label for="category-2" class="category-label"><span class="material-icons">phone</span></label>
+
+          <input type="radio" id="category-3" name="memo-category" value="3">
+          <label for="category-3" class="category-label"><span class="material-icons">category</span></label>
+        </div>
+
+        <label for="memo-body">本文:</label>
+        <textarea id="memo-body"></textarea>
+
+        <label for="memo-timestamp">登録日時:</label>
+        <input type="datetime-local" id="memo-timestamp">
+
+        <div class="form-actions">
+          <button type="submit">保存</button>
+          <button type="button" id="cancel-memo">キャンセル</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="./db.js" defer></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>

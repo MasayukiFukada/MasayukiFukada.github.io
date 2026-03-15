@@ -1,0 +1,18 @@
+{
+  "name": "Back of Flyer Memo",
+  "short_name": "Memo",
+  "description": "チラシの裏に書くようなメモをPWAで作成するアプリです。",
+  "start_url": "./",
+  "display_override": ["fullscreen", "standalone"],
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#333333",
+  "icons": [
+    {
+      "src": "./icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
