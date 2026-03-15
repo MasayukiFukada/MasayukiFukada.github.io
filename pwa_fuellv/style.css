@@ -1,0 +1,89 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+main {
+    padding: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+section {
+    background-color: #fff;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    color: #333;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+#price-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem; /* form-group間のスペース */
+    align-items: flex-start; /* フォームグループの上端を揃える */
+}
+
+.form-group {
+    display: flex; /* labelとinputを横並びにする */
+    align-items: center; /* 垂直方向中央揃え */
+    gap: 0.5rem; /* labelとinput間のスペース */
+    flex: 1 1 calc(50% - 0.5rem); /* 2列レイアウト */
+    min-width: 250px; /* 最小幅を設定して小さくなりすぎないように */
+}
+
+.form-group label {
+    font-weight: bold;
+    flex-shrink: 0; /* ラベルが縮まないように */
+}
+
+.form-group input[type="number"] {
+    flex-grow: 1; /* 入力欄が残りのスペースを埋める */
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* 小画面では縦積みにする */
+@media (max-width: 600px) {
+    .form-group {
+        flex: 1 1 100%; /* 1列レイアウト */
+    }
+    .form-group input[type="number"] {
+        margin-bottom: 0; /* フォームグループ内のinputの下マージンは不要に */
+    }
+}
+
+
+#results-list li {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+}
+
+footer {
+    text-align: center;
+    padding: 1rem;
+    color: #777;
+    font-size: 0.8rem;
+}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ガソリン価格計算PWA</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="給油計算">
+</head>
+<body>
+    <header>
+        <h1>ガソリン価格計算</h1>
+    </header>
+    <main>
+        <section id="price-input-section">
+            <h2>現在のガソリン単価</h2>
+            <form id="price-form">
+                <div class="form-group">
+                    <label for="unit-price">単価 (円/L):</label>
+                    <input type="number" id="unit-price" min="1" inputmode="decimal" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="tax-rate">消費税 (%):</label>
+                    <input type="number" id="tax-rate" min="0" max="100" inputmode="decimal" value="10" required>
+                </div>
+            </form>
+        </section>
+
+        <section id="calculation-results-section">
+            <h2>計算結果</h2>
+            <ul id="results-list">
+                <!-- Calculation results will be loaded here by JavaScript -->
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 ガソリン価格計算</p>
+    </footer>
+
+    <script src="./app.js"></script>
+</body>
+</html>
