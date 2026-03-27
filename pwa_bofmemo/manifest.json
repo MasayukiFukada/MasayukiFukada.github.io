@@ -3,7 +3,6 @@
   "short_name": "Memo",
   "description": "チラシの裏に書くようなメモをPWAで作成するアプリです。",
   "start_url": "./",
-  "display_override": ["fullscreen", "standalone"],
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#333333",
@@ -12,7 +11,7 @@
       "src": "./icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ]
 }
