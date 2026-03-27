@@ -1,4 +1,5 @@
-const CACHE_NAME = 'fuel-tracker-pwa-cache-v1';
+// Build: 2026-03-27 00:00:00
+const CACHE_NAME = 'fuel-tracker-pwa-cache-20260327000000';
 const urlsToCache = [
   './',
   './index.html',
