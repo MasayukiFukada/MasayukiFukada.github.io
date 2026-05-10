@@ -26,6 +26,7 @@ if ('serviceWorker' in navigator) {
 }
 
 const actionButton = document.getElementById('action-button');
+const exportButton = document.getElementById('export-button');
 const memoPopup = document.getElementById('memo-popup');
 // const memoPopupTitle = memoPopup.querySelector('h2');
 const cancelMemoButton = document.getElementById('cancel-memo');
@@ -241,6 +242,41 @@ memoForm.addEventListener('submit', async (event) => {
   memoForm.reset();
   currentEditingMemoId = null;
   currentGpsLocation = ''; // Reset after use
+});
+
+// Initial render
+renderMemoList();
+length === 0) {
+    alert('エクスポートするメモがありまへん。');
+    return;
+  }
+
+  const exportData = memos.map(memo => {
+    const date = new Date(memo.timestamp);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    
+    // 本文から数値を抽出（金額として扱う想定）
+    const amountMatch = memo.body.match(/\d+/);
+    const amount = amountMatch ? parseInt(amountMatch[0], 10) : 0;
+
+    return {
+      date: `${yyyy}-${mm}-${dd}`,
+      note: memo.title,
+      amount: amount
+    };
+  });
+
+  const jsonString = JSON.stringify(exportData, null, 2);
+
+  try {
+    await navigator.clipboard.writeText(jsonString);
+    alert('クリップボードにコピーしました！');
+  } catch (err) {
+    console.error('Failed to copy: ', err);
+    alert('コピーに失敗しました。');
+  }
 });
 
 // Initial render
