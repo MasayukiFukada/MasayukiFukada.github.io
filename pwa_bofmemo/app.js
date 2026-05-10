@@ -244,9 +244,9 @@ memoForm.addEventListener('submit', async (event) => {
   currentGpsLocation = ''; // Reset after use
 });
 
-// Initial render
-renderMemoList();
-length === 0) {
+exportButton.addEventListener('click', async () => {
+  const memos = await getMemos();
+  if (memos.length === 0) {
     alert('エクスポートするメモがありまへん。');
     return;
   }
