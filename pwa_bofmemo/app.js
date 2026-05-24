@@ -71,6 +71,10 @@ async function renderMemoList() {
     if (selectedMemoIds.has(memo.id)) {
       listItem.classList.add('selected-for-delete');
     }
+
+    const amountMatch = memo.body.match(/\d+/);
+    const firstAmount = amountMatch ? parseInt(amountMatch[0], 10) : null;
+
     listItem.innerHTML = `
       <input type="checkbox" data-id="${memo.id}" ${selectedMemoIds.has(memo.id) ? 'checked' : ''}>
       <div class="memo-item-content" data-id="${memo.id}">
@@ -78,6 +82,15 @@ async function renderMemoList() {
         <h3>${memo.title}</h3>
         <p class="memo-body-preview">${memo.body}</p>
         <p class="memo-timestamp">${new Date(memo.timestamp).toLocaleString()}</p>
+        ${firstAmount !== null ? `
+        <div class="memo-item-adjust">
+          <button class="adjust-btn" data-id="${memo.id}" data-delta="-1000">-1,000</button>
+          <button class="adjust-btn" data-id="${memo.id}" data-delta="-100">-100</button>
+          <span class="memo-amount-display">${firstAmount.toLocaleString()}</span>
+          <button class="adjust-btn" data-id="${memo.id}" data-delta="+100">+100</button>
+          <button class="adjust-btn" data-id="${memo.id}" data-delta="+1000">+1,000</button>
+        </div>
+        ` : ''}
       </div>
       <div class="memo-item-actions">
         ${memo.gps ? `<button data-gps="${memo.gps}" class="open-map-button"><span class="material-icons">map</span></button>` : ''}
@@ -111,6 +124,23 @@ async function renderMemoList() {
         listItem.classList.remove('selected-for-delete');
       }
       updateActionButton();
+    });
+  });
+
+  document.querySelectorAll('.adjust-btn').forEach(btn => {
+    btn.addEventListener('click', async (event) => {
+      event.stopPropagation();
+      const button = event.target.closest('.adjust-btn');
+      const id = button.dataset.id;
+      const delta = parseInt(button.dataset.delta, 10);
+      const memo = await getMemoById(id);
+      if (memo) {
+        memo.body = memo.body.replace(/\d+/, (match) => {
+          return Math.max(0, parseInt(match, 10) + delta).toString();
+        });
+        await updateMemo(memo);
+        renderMemoList();
+      }
     });
   });
 

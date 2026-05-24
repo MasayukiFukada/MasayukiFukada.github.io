@@ -243,14 +243,56 @@ main {
   cursor: pointer;
   display: grid;
   grid-template-columns: auto 1fr;
-  grid-template-rows: auto auto auto;
+  grid-template-rows: auto auto auto auto;
   grid-template-areas:
     "icon title"
     "icon body"
-    "icon details";
+    "icon details"
+    "icon adjust";
   align-items: center;
   gap: 0 16px;
   overflow: hidden; /* Prevent content from overflowing the grid */
+}
+
+.memo-item-adjust {
+  grid-area: adjust;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.adjust-btn {
+  background: var(--background-color);
+  border: 1px solid var(--divider-color);
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.8em;
+  font-weight: 500;
+  min-width: 48px;
+  text-align: center;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.adjust-btn:hover {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.adjust-btn:active {
+  transform: scale(0.95);
+}
+
+.memo-amount-display {
+  font-size: 1.15em;
+  font-weight: 700;
+  padding: 0 10px;
+  min-width: 60px;
+  text-align: center;
+  color: var(--primary-color);
 }
 
 .category-icon {
