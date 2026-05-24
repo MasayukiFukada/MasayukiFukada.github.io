@@ -1,16 +1,17 @@
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(registration => {
-        console.log('Service Worker registered: ', registration);
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then((registration) => {
+        console.log("Service Worker registered: ", registration);
         registration.onupdatefound = () => {
           const installingWorker = registration.installing;
           if (installingWorker) {
             installingWorker.onstatechange = () => {
-              if (installingWorker.state === 'installed') {
+              if (installingWorker.state === "installed") {
                 if (navigator.serviceWorker.controller) {
                   // New content is available, show a notification to the user.
-                  if (confirm('新しいバージョンがあります。更新しまっか？')) {
+                  if (confirm("新しいバージョンがあります。更新しまっか？")) {
                     window.location.reload();
                   }
                 }
@@ -19,36 +20,41 @@ if ('serviceWorker' in navigator) {
           }
         };
       })
-      .catch(error => {
-        console.log('Service Worker registration failed: ', error);
+      .catch((error) => {
+        console.log("Service Worker registration failed: ", error);
       });
   });
 }
 
-const actionButton = document.getElementById('action-button');
-const exportButton = document.getElementById('export-button');
-const memoPopup = document.getElementById('memo-popup');
+const actionButton = document.getElementById("action-button");
+const exportButton = document.getElementById("export-button");
+const memoPopup = document.getElementById("memo-popup");
 // const memoPopupTitle = memoPopup.querySelector('h2');
-const cancelMemoButton = document.getElementById('cancel-memo');
-const memoListElement = document.getElementById('memo-list');
-const memoForm = document.getElementById('memo-form');
-const memoTitleInput = document.getElementById('memo-title');
-const memoBodyTextarea = document.getElementById('memo-body');
-const memoTimestampInput = document.getElementById('memo-timestamp');
-const memoCategoryRadioGroup = document.getElementById('memo-category-radio');
+const cancelMemoButton = document.getElementById("cancel-memo");
+const memoListElement = document.getElementById("memo-list");
+const memoForm = document.getElementById("memo-form");
+const memoTitleInput = document.getElementById("memo-title");
+const memoBodyTextarea = document.getElementById("memo-body");
+const memoTimestampInput = document.getElementById("memo-timestamp");
+const memoCategoryRadioGroup = document.getElementById("memo-category-radio");
 
 let deleteMode = false;
 let selectedMemoIds = new Set();
 let currentEditingMemoId = null;
-let currentGpsLocation = '';
+let currentGpsLocation = "";
 
 function getCategoryIcon(category) {
   switch (category) {
-    case 0: return 'payments';
-    case 1: return 'numbers';
-    case 2: return 'phone';
-    case 3: return 'category';
-    default: return 'category';
+    case 0:
+      return "payments";
+    case 1:
+      return "numbers";
+    case 2:
+      return "phone";
+    case 3:
+      return "category";
+    default:
+      return "category";
   }
 }
 
@@ -56,33 +62,36 @@ async function renderMemoList() {
   console.log(await getMemos()); // for debug
   const memos = await getMemos(); // Fetch memos from IndexedDB
   memos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // 日付の降順にソート
-  memoListElement.innerHTML = '';
+  memoListElement.innerHTML = "";
   if (memos.length === 0) {
-    memoListElement.innerHTML = '<p>まだメモあらへんわ。新しいメモ作ってみぃひん？</p>';
+    memoListElement.innerHTML =
+      "<p>まだメモあらへんわ。新しいメモ作ってみぃひん？</p>";
     actionButton.innerHTML = '<span class="material-icons">add</span>';
     deleteMode = false;
-    actionButton.classList.remove('delete-mode');
+    actionButton.classList.remove("delete-mode");
     return;
   }
 
-  memos.forEach(memo => {
-    const listItem = document.createElement('li');
-    listItem.classList.add('memo-item');
+  memos.forEach((memo) => {
+    const listItem = document.createElement("li");
+    listItem.classList.add("memo-item");
     if (selectedMemoIds.has(memo.id)) {
-      listItem.classList.add('selected-for-delete');
+      listItem.classList.add("selected-for-delete");
     }
 
     const amountMatch = memo.body.match(/\d+/);
     const firstAmount = amountMatch ? parseInt(amountMatch[0], 10) : null;
 
     listItem.innerHTML = `
-      <input type="checkbox" data-id="${memo.id}" ${selectedMemoIds.has(memo.id) ? 'checked' : ''}>
+      <input type="checkbox" data-id="${memo.id}" ${selectedMemoIds.has(memo.id) ? "checked" : ""}>
       <div class="memo-item-content" data-id="${memo.id}">
         <span class="material-icons category-icon">${getCategoryIcon(memo.category)}</span>
         <h3>${memo.title}</h3>
         <p class="memo-body-preview">${memo.body}</p>
         <p class="memo-timestamp">${new Date(memo.timestamp).toLocaleString()}</p>
-        ${firstAmount !== null ? `
+        ${
+          firstAmount !== null
+            ? `
         <div class="memo-item-adjust">
           <button class="adjust-btn" data-id="${memo.id}" data-delta="-1000">-1,000</button>
           <button class="adjust-btn" data-id="${memo.id}" data-delta="-100">-100</button>
@@ -90,47 +99,54 @@ async function renderMemoList() {
           <button class="adjust-btn" data-id="${memo.id}" data-delta="+100">+100</button>
           <button class="adjust-btn" data-id="${memo.id}" data-delta="+1000">+1,000</button>
         </div>
-        ` : ''}
+        `
+            : ""
+        }
       </div>
       <div class="memo-item-actions">
-        ${memo.gps ? `<button data-gps="${memo.gps}" class="open-map-button"><span class="material-icons">map</span></button>` : ''}
+        ${memo.gps ? `<button data-gps="${memo.gps}" class="open-map-button"><span class="material-icons">map</span></button>` : ""}
       </div>
     `;
     memoListElement.appendChild(listItem);
   });
 
   // Add event listeners for map buttons and checkboxes after rendering
-  document.querySelectorAll('.open-map-button').forEach(button => {
-    button.addEventListener('click', (event) => {
+  document.querySelectorAll(".open-map-button").forEach((button) => {
+    button.addEventListener("click", (event) => {
       event.stopPropagation(); // Prevent listItem click event
-      const button = event.target.closest('.open-map-button');
+      const button = event.target.closest(".open-map-button");
       const gps = button.dataset.gps;
       if (gps) {
-        window.open(`https://www.google.com/maps/search/?api=1&query=${gps}`, '_blank');
+        window.open(
+          `https://www.google.com/maps/search/?api=1&query=${gps}`,
+          "_blank",
+        );
       }
     });
   });
 
-  document.querySelectorAll('.memo-item input[type="checkbox"]').forEach(checkbox => {
-    checkbox.addEventListener('change', (event) => {
-      event.stopPropagation(); // Prevent listItem click event
-      const id = event.target.dataset.id;
-      const listItem = event.target.closest('.memo-item');
-      if (event.target.checked) {
-        selectedMemoIds.add(id);
-        listItem.classList.add('selected-for-delete');
-      } else {
-        selectedMemoIds.delete(id);
-        listItem.classList.remove('selected-for-delete');
-      }
-      updateActionButton();
+  document
+    .querySelectorAll('.memo-item input[type="checkbox"]')
+    .forEach((checkbox) => {
+      checkbox.addEventListener("change", (event) => {
+        event.stopPropagation(); // Prevent listItem click event
+        const id = event.target.dataset.id;
+        const listItem = event.target.closest(".memo-item");
+        if (event.target.checked) {
+          selectedMemoIds.add(id);
+          listItem.classList.add("selected-for-delete");
+        } else {
+          selectedMemoIds.delete(id);
+          listItem.classList.remove("selected-for-delete");
+        }
+        updateActionButton();
+      });
     });
-  });
 
-  document.querySelectorAll('.adjust-btn').forEach(btn => {
-    btn.addEventListener('click', async (event) => {
+  document.querySelectorAll(".adjust-btn").forEach((btn) => {
+    btn.addEventListener("click", async (event) => {
       event.stopPropagation();
-      const button = event.target.closest('.adjust-btn');
+      const button = event.target.closest(".adjust-btn");
       const id = button.dataset.id;
       const delta = parseInt(button.dataset.delta, 10);
       const memo = await getMemoById(id);
@@ -144,16 +160,18 @@ async function renderMemoList() {
     });
   });
 
-  document.querySelectorAll('.memo-item-content').forEach(contentDiv => {
-    contentDiv.addEventListener('click', async (event) => {
-      const id = event.target.closest('.memo-item-content').dataset.id;
+  document.querySelectorAll(".memo-item-content").forEach((contentDiv) => {
+    contentDiv.addEventListener("click", async (event) => {
+      const id = event.target.closest(".memo-item-content").dataset.id;
       currentEditingMemoId = id;
       const memoToEdit = await getMemoById(id);
       if (memoToEdit) {
         // memoPopupTitle.textContent = 'メモ編集';
         memoTitleInput.value = memoToEdit.title;
         // Set category for editing
-        const categoryRadio = document.getElementById(`category-${memoToEdit.category}`);
+        const categoryRadio = document.getElementById(
+          `category-${memoToEdit.category}`,
+        );
         if (categoryRadio) {
           categoryRadio.checked = true;
         }
@@ -161,12 +179,12 @@ async function renderMemoList() {
         // Set timestamp for editing
         const date = new Date(memoToEdit.timestamp);
         const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const day = date.getDate().toString().padStart(2, "0");
+        const hours = date.getHours().toString().padStart(2, "0");
+        const minutes = date.getMinutes().toString().padStart(2, "0");
         memoTimestampInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
-        memoPopup.classList.add('visible');
+        memoPopup.classList.add("visible");
       }
     });
   });
@@ -177,11 +195,11 @@ async function renderMemoList() {
 function updateActionButton() {
   if (selectedMemoIds.size > 0) {
     actionButton.innerHTML = '<span class="material-icons">delete</span>';
-    actionButton.classList.add('delete-mode');
+    actionButton.classList.add("delete-mode");
     deleteMode = true;
   } else {
     actionButton.innerHTML = '<span class="material-icons">add</span>';
-    actionButton.classList.remove('delete-mode');
+    actionButton.classList.remove("delete-mode");
     deleteMode = false;
   }
 }
@@ -189,7 +207,7 @@ function updateActionButton() {
 async function requestLocation() {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
-      reject('Geolocation is not supported by your browser');
+      reject("Geolocation is not supported by your browser");
     } else {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -198,17 +216,17 @@ async function requestLocation() {
           resolve(currentGpsLocation);
         },
         (error) => {
-          console.error('GPS location error:', error);
-          currentGpsLocation = '';
+          console.error("GPS location error:", error);
+          currentGpsLocation = "";
           // Don't reject, just resolve with empty string so the app can continue
-          resolve('');
-        }
+          resolve("");
+        },
       );
     }
   });
 }
 
-actionButton.addEventListener('click', async () => {
+actionButton.addEventListener("click", async () => {
   if (deleteMode) {
     if (confirm(`ほんまに ${selectedMemoIds.size} 件のメモを削除するんか？`)) {
       for (const id of selectedMemoIds) {
@@ -224,37 +242,39 @@ actionButton.addEventListener('click', async () => {
     // Set current datetime as default for new memo
     const now = new Date();
     const year = now.getFullYear();
-    const month = (now.getMonth() + 1).toString().padStart(2, '0');
-    const day = now.getDate().toString().padStart(2, '0');
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const month = (now.getMonth() + 1).toString().padStart(2, "0");
+    const day = now.getDate().toString().padStart(2, "0");
+    const hours = now.getHours().toString().padStart(2, "0");
+    const minutes = now.getMinutes().toString().padStart(2, "0");
     memoTimestampInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
-    memoPopup.classList.add('visible');
+    memoPopup.classList.add("visible");
     // Request location when opening the popup for a new memo
     requestLocation();
   }
 });
 
-cancelMemoButton.addEventListener('click', () => {
-  memoPopup.classList.remove('visible');
+cancelMemoButton.addEventListener("click", () => {
+  memoPopup.classList.remove("visible");
   memoForm.reset();
   currentEditingMemoId = null;
 });
 
-memoPopup.addEventListener('click', (event) => {
+memoPopup.addEventListener("click", (event) => {
   if (event.target === memoPopup) {
-    memoPopup.classList.remove('visible');
+    memoPopup.classList.remove("visible");
     memoForm.reset();
     currentEditingMemoId = null;
   }
 });
 
-memoForm.addEventListener('submit', async (event) => {
+memoForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const selectedCategory = memoCategoryRadioGroup.querySelector('input[name="memo-category"]:checked');
+  const selectedCategory = memoCategoryRadioGroup.querySelector(
+    'input[name="memo-category"]:checked',
+  );
   const memoData = {
-    category: parseInt(selectedCategory ? selectedCategory.value : '0'),
+    category: parseInt(selectedCategory ? selectedCategory.value : "0"),
     title: memoTitleInput.value,
     body: memoBodyTextarea.value,
     timestamp: new Date(memoTimestampInput.value),
@@ -264,29 +284,33 @@ memoForm.addEventListener('submit', async (event) => {
     const existingMemo = await getMemoById(currentEditingMemoId);
     await updateMemo({ ...existingMemo, ...memoData });
   } else {
-    await addMemo({ ...memoData, id: crypto.randomUUID(), gps: currentGpsLocation });
+    await addMemo({
+      ...memoData,
+      id: crypto.randomUUID(),
+      gps: currentGpsLocation,
+    });
   }
 
   renderMemoList();
-  memoPopup.classList.remove('visible');
+  memoPopup.classList.remove("visible");
   memoForm.reset();
   currentEditingMemoId = null;
-  currentGpsLocation = ''; // Reset after use
+  currentGpsLocation = ""; // Reset after use
 });
 
-exportButton.addEventListener('click', async () => {
+exportButton.addEventListener("click", async () => {
   const memos = await getMemos();
   if (memos.length === 0) {
-    alert('エクスポートするメモがありまへん。');
+    alert("エクスポートするメモがありまへん。");
     return;
   }
 
-  const exportData = memos.map(memo => {
+  const exportData = memos.map((memo) => {
     const date = new Date(memo.timestamp);
     const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+
     // 本文から数値を抽出（金額として扱う想定）
     const amountMatch = memo.body.match(/\d+/);
     const amount = amountMatch ? parseInt(amountMatch[0], 10) : 0;
@@ -294,7 +318,7 @@ exportButton.addEventListener('click', async () => {
     return {
       date: `${yyyy}-${mm}-${dd}`,
       note: memo.title,
-      amount: amount
+      amount: amount,
     };
   });
 
@@ -302,10 +326,10 @@ exportButton.addEventListener('click', async () => {
 
   try {
     await navigator.clipboard.writeText(jsonString);
-    alert('クリップボードにコピーしました！');
+    alert("クリップボードにコピーしました！");
   } catch (err) {
-    console.error('Failed to copy: ', err);
-    alert('コピーに失敗しました。');
+    console.error("Failed to copy: ", err);
+    alert("コピーに失敗しました。");
   }
 });
 

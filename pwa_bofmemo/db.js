@@ -1,6 +1,6 @@
-const DB_NAME = 'BackOfFlyerMemoDB';
+const DB_NAME = "BackOfFlyerMemoDB";
 const DB_VERSION = 1;
-const STORE_NAME = 'memos';
+const STORE_NAME = "memos";
 
 let db;
 
@@ -11,7 +11,7 @@ function openDB() {
     request.onupgradeneeded = (event) => {
       db = event.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        db.createObjectStore(STORE_NAME, { keyPath: "id" });
       }
     };
 
@@ -21,7 +21,7 @@ function openDB() {
     };
 
     request.onerror = (event) => {
-      reject('IndexedDB error: ' + event.target.errorCode);
+      reject("IndexedDB error: " + event.target.errorCode);
     };
   });
 }
@@ -29,7 +29,7 @@ function openDB() {
 async function addMemo(memo) {
   await openDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const transaction = db.transaction([STORE_NAME], "readwrite");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.add(memo);
 
@@ -38,7 +38,7 @@ async function addMemo(memo) {
     };
 
     request.onerror = (event) => {
-      reject('Error adding memo: ' + event.target.errorCode);
+      reject("Error adding memo: " + event.target.errorCode);
     };
   });
 }
@@ -46,7 +46,7 @@ async function addMemo(memo) {
 async function getMemos() {
   await openDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const transaction = db.transaction([STORE_NAME], "readonly");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.getAll();
 
@@ -55,7 +55,7 @@ async function getMemos() {
     };
 
     request.onerror = (event) => {
-      reject('Error getting memos: ' + event.target.errorCode);
+      reject("Error getting memos: " + event.target.errorCode);
     };
   });
 }
@@ -63,7 +63,7 @@ async function getMemos() {
 async function getMemoById(id) {
   await openDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const transaction = db.transaction([STORE_NAME], "readonly");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.get(id);
 
@@ -72,7 +72,7 @@ async function getMemoById(id) {
     };
 
     request.onerror = (event) => {
-      reject('Error getting memo by ID: ' + event.target.errorCode);
+      reject("Error getting memo by ID: " + event.target.errorCode);
     };
   });
 }
@@ -80,7 +80,7 @@ async function getMemoById(id) {
 async function updateMemo(memo) {
   await openDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const transaction = db.transaction([STORE_NAME], "readwrite");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.put(memo);
 
@@ -89,7 +89,7 @@ async function updateMemo(memo) {
     };
 
     request.onerror = (event) => {
-      reject('Error updating memo: ' + event.target.errorCode);
+      reject("Error updating memo: " + event.target.errorCode);
     };
   });
 }
@@ -97,7 +97,7 @@ async function updateMemo(memo) {
 async function deleteMemo(id) {
   await openDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const transaction = db.transaction([STORE_NAME], "readwrite");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.delete(id);
 
@@ -106,7 +106,7 @@ async function deleteMemo(id) {
     };
 
     request.onerror = (event) => {
-      reject('Error deleting memo: ' + event.target.errorCode);
+      reject("Error deleting memo: " + event.target.errorCode);
     };
   });
 }
