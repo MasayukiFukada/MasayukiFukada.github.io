@@ -93,11 +93,15 @@ async function renderMemoList() {
           firstAmount !== null
             ? `
         <div class="memo-item-adjust">
-          <button class="adjust-btn" data-id="${memo.id}" data-delta="-1000">-1,000</button>
-          <button class="adjust-btn" data-id="${memo.id}" data-delta="-100">-100</button>
-          <span class="memo-amount-display">${firstAmount.toLocaleString()}</span>
-          <button class="adjust-btn" data-id="${memo.id}" data-delta="+100">+100</button>
-          <button class="adjust-btn" data-id="${memo.id}" data-delta="+1000">+1,000</button>
+          <div class="memo-amount-row">
+            <span class="memo-amount-display">${firstAmount.toLocaleString()}</span>
+          </div>
+          <div class="memo-btn-row">
+            <button class="adjust-btn" data-id="${memo.id}" data-delta="-1000">-1,000</button>
+            <button class="adjust-btn" data-id="${memo.id}" data-delta="-100">-100</button>
+            <button class="adjust-btn" data-id="${memo.id}" data-delta="+100">+100</button>
+            <button class="adjust-btn" data-id="${memo.id}" data-delta="+1000">+1,000</button>
+          </div>
         </div>
         `
             : ""
