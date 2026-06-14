@@ -58,6 +58,25 @@ function getCategoryIcon(category) {
   }
 }
 
+function updateBodyInputMode(category) {
+  switch (category) {
+    case 0:
+      memoBodyTextarea.setAttribute("inputmode", "decimal");
+      break;
+    case 1:
+      memoBodyTextarea.setAttribute("inputmode", "numeric");
+      break;
+    case 2:
+      memoBodyTextarea.setAttribute("inputmode", "tel");
+      break;
+    case 3:
+      memoBodyTextarea.removeAttribute("inputmode");
+      break;
+    default:
+      memoBodyTextarea.removeAttribute("inputmode");
+  }
+}
+
 async function renderMemoList() {
   console.log(await getMemos()); // for debug
   const memos = await getMemos(); // Fetch memos from IndexedDB
@@ -179,6 +198,7 @@ async function renderMemoList() {
         if (categoryRadio) {
           categoryRadio.checked = true;
         }
+        updateBodyInputMode(memoToEdit.category);
         memoBodyTextarea.value = memoToEdit.body;
         // Set timestamp for editing
         const date = new Date(memoToEdit.timestamp);
@@ -251,6 +271,7 @@ actionButton.addEventListener("click", async () => {
     const hours = now.getHours().toString().padStart(2, "0");
     const minutes = now.getMinutes().toString().padStart(2, "0");
     memoTimestampInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    updateBodyInputMode(0); // デフォルトのカテゴリ0(金額)にリセット
     memoPopup.classList.add("visible");
     // Request location when opening the popup for a new memo
     requestLocation();
@@ -300,6 +321,12 @@ memoForm.addEventListener("submit", async (event) => {
   memoForm.reset();
   currentEditingMemoId = null;
   currentGpsLocation = ""; // Reset after use
+});
+
+memoCategoryRadioGroup.addEventListener("change", (event) => {
+  if (event.target.name === "memo-category") {
+    updateBodyInputMode(parseInt(event.target.value, 10));
+  }
 });
 
 exportButton.addEventListener("click", async () => {
