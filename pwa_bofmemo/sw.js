@@ -1,5 +1,5 @@
-// Build: 2026-08-21 23:55:00
-const CACHE_NAME = "back-of-flyer-memo-pwa-cache-20260821235500";
+// Build: 2026-08-22 00:15:00
+const CACHE_NAME = "back-of-flyer-memo-pwa-cache-20260822001500";
 
 const urlsToCache = [
 
@@ -43,6 +43,14 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
+  // POST リクエストや外部オリジン（自サイト以外）への通信はキャッシュせず素通しする
+  if (
+    event.request.method !== "GET" ||
+    !event.request.url.startsWith(self.location.origin)
+  ) {
+    return;
+  }
+
   // Cache First, falling back to Network
   event.respondWith(
     caches.match(event.request).then((response) => {
