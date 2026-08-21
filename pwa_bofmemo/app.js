@@ -36,10 +36,12 @@ const settingsForm = document.getElementById("settings-form");
 const serverUrlInput = document.getElementById("server-url-input");
 const pasteUrlBtn = document.getElementById("paste-url-btn");
 const scanQrBtn = document.getElementById("scan-qr-btn");
+const testConnectionBtn = document.getElementById("test-connection-btn");
 const qrReaderContainer = document.getElementById("qr-reader-container");
 const qrVideo = document.getElementById("qr-video");
 const stopQrBtn = document.getElementById("stop-qr-btn");
 const toastElement = document.getElementById("toast");
+
 
 const memoPopup = document.getElementById("memo-popup");
 // const memoPopupTitle = memoPopup.querySelector('h2');
@@ -435,11 +437,11 @@ sendButton.addEventListener("click", async () => {
   const serverUrl = getServerUrl();
   const endpoint = `${serverUrl}/api/import`;
 
-  showToast("ExpenditureBookへ送信中...", "info", 2000);
+  showToast(`送信中: ${endpoint}`, "info", 3000);
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     const response = await fetch(endpoint, {
       method: "POST",
@@ -456,11 +458,14 @@ sendButton.addEventListener("click", async () => {
       const result = await response.json();
       showToast(`🚀 ${result.count || exportData.length}件の支出を送信しました！`, "success", 4000);
     } else {
-      throw new Error(`Server returned status: ${response.status}`);
+      throw new Error(`HTTP ${response.status} (${response.statusText || 'エラー'})`);
     }
   } catch (error) {
     console.error("Direct send failed:", error);
-    showToast("送信に失敗しました。設定でURLを確認してください。", "error", 4000);
+    const errMsg = error.name === 'AbortError' 
+      ? 'タイムアウト (8秒): サーバーに繋がりません' 
+      : `${error.message || error}`;
+    showToast(`送信失敗: ${errMsg}`, "error", 6000);
   }
 });
 
@@ -496,6 +501,39 @@ pasteUrlBtn.addEventListener("click", async () => {
     showToast("クリップボードからの読み取りが許可されていません", "error");
   }
 });
+
+testConnectionBtn.addEventListener("click", async () => {
+  const inputUrl = serverUrlInput.value.trim() || getServerUrl();
+  let cleanUrl = inputUrl.replace(/\/+$/, "");
+  if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+    cleanUrl = `http://${cleanUrl}`;
+  }
+  const testEndpoint = `${cleanUrl}/api/import`;
+
+  showToast(`接続テスト中: ${testEndpoint}`, "info", 3000);
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    const res = await fetch(testEndpoint, {
+      method: "GET",
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      showToast("✅ 接続成功！サーバーと通信できました", "success", 4000);
+    } else {
+      showToast(`⚠️ 応答あり (HTTP ${res.status})`, "info", 4000);
+    }
+  } catch (err) {
+    console.error("Test connection failed:", err);
+    const reason = err.name === 'AbortError' ? 'タイムアウト' : (err.message || '通信エラー');
+    showToast(`❌ 接続失敗 (${reason})。SSL証明書かURLを確認してください`, "error", 6000);
+  }
+});
+
 
 // QR Code Scanning
 scanQrBtn.addEventListener("click", async () => {
