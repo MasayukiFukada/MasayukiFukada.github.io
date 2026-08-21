@@ -28,6 +28,19 @@ if ("serviceWorker" in navigator) {
 
 const actionButton = document.getElementById("action-button");
 const exportButton = document.getElementById("export-button");
+const sendButton = document.getElementById("send-button");
+const settingsButton = document.getElementById("settings-button");
+const settingsPopup = document.getElementById("settings-popup");
+const cancelSettingsButton = document.getElementById("cancel-settings");
+const settingsForm = document.getElementById("settings-form");
+const serverUrlInput = document.getElementById("server-url-input");
+const pasteUrlBtn = document.getElementById("paste-url-btn");
+const scanQrBtn = document.getElementById("scan-qr-btn");
+const qrReaderContainer = document.getElementById("qr-reader-container");
+const qrVideo = document.getElementById("qr-video");
+const stopQrBtn = document.getElementById("stop-qr-btn");
+const toastElement = document.getElementById("toast");
+
 const memoPopup = document.getElementById("memo-popup");
 // const memoPopupTitle = memoPopup.querySelector('h2');
 const cancelMemoButton = document.getElementById("cancel-memo");
@@ -42,6 +55,12 @@ let deleteMode = false;
 let selectedMemoIds = new Set();
 let currentEditingMemoId = null;
 let currentGpsLocation = "";
+let qrStream = null;
+let qrScanInterval = null;
+
+const DEFAULT_SERVER_URL = "http://expenditure.local:3000";
+const STORAGE_KEY_SERVER_URL = "expenditure_server_url";
+
 
 function getCategoryIcon(category) {
   switch (category) {
@@ -357,12 +376,187 @@ exportButton.addEventListener("click", async () => {
 
   try {
     await navigator.clipboard.writeText(jsonString);
-    alert("クリップボードにコピーしました！");
+    showToast("クリップボードにコピーしました！", "success");
   } catch (err) {
     console.error("Failed to copy: ", err);
-    alert("コピーに失敗しました。");
+    showToast("コピーに失敗しました。", "error");
   }
 });
 
+// Toast notification helper
+function showToast(message, type = "info", duration = 3000) {
+  if (!toastElement) return;
+  toastElement.textContent = message;
+  toastElement.className = `toast show ${type}`;
+  setTimeout(() => {
+    toastElement.classList.remove("show");
+  }, duration);
+}
+
+// Server URL helper
+function getServerUrl() {
+  return localStorage.getItem(STORAGE_KEY_SERVER_URL) || DEFAULT_SERVER_URL;
+}
+
+function setServerUrl(url) {
+  let cleanUrl = url.trim().replace(/\/+$/, "");
+  if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+    cleanUrl = `http://${cleanUrl}`;
+  }
+  localStorage.setItem(STORAGE_KEY_SERVER_URL, cleanUrl);
+  return cleanUrl;
+}
+
+// Direct send to ExpenditureBook
+sendButton.addEventListener("click", async () => {
+  const memos = await getMemos();
+  if (memos.length === 0) {
+    showToast("送信するメモがありません。", "error");
+    return;
+  }
+
+  const exportData = memos.map((memo) => {
+    const date = new Date(memo.timestamp);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+
+    // 本文から数値を抽出（金額として扱う想定）
+    const amountMatch = memo.body.match(/\d+/);
+    const amount = amountMatch ? parseInt(amountMatch[0], 10) : 0;
+
+    return {
+      date: `${yyyy}-${mm}-${dd}`,
+      note: memo.title,
+      amount: amount,
+    };
+  });
+
+  const serverUrl = getServerUrl();
+  const endpoint = `${serverUrl}/api/import`;
+
+  showToast("ExpenditureBookへ送信中...", "info", 2000);
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(exportData),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (response.ok) {
+      const result = await response.json();
+      showToast(`🚀 ${result.count || exportData.length}件の支出を送信しました！`, "success", 4000);
+    } else {
+      throw new Error(`Server returned status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Direct send failed:", error);
+    showToast("送信に失敗しました。設定でURLを確認してください。", "error", 4000);
+  }
+});
+
+// Settings Dialog
+settingsButton.addEventListener("click", () => {
+  serverUrlInput.value = getServerUrl();
+  settingsPopup.classList.add("visible");
+});
+
+cancelSettingsButton.addEventListener("click", () => {
+  stopQrScanning();
+  settingsPopup.classList.remove("visible");
+});
+
+settingsForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const url = serverUrlInput.value;
+  const savedUrl = setServerUrl(url);
+  stopQrScanning();
+  settingsPopup.classList.remove("visible");
+  showToast(`接続先を保存しました: ${savedUrl}`, "success");
+});
+
+pasteUrlBtn.addEventListener("click", async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (text) {
+      serverUrlInput.value = text.trim();
+      showToast("URLを貼り付けました", "info");
+    }
+  } catch (err) {
+    console.error("Clipboard paste error:", err);
+    showToast("クリップボードからの読み取りが許可されていません", "error");
+  }
+});
+
+// QR Code Scanning
+scanQrBtn.addEventListener("click", async () => {
+  if (qrStream) {
+    stopQrScanning();
+    return;
+  }
+
+  try {
+    qrStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+    });
+    qrVideo.srcObject = qrStream;
+    await qrVideo.play();
+    qrReaderContainer.classList.remove("hidden");
+
+    if ("BarcodeDetector" in window) {
+      const barcodeDetector = new window.BarcodeDetector({
+        formats: ["qr_code"],
+      });
+
+      qrScanInterval = setInterval(async () => {
+        try {
+          const barcodes = await barcodeDetector.detect(qrVideo);
+          if (barcodes.length > 0) {
+            const detectedValue = barcodes[0].rawValue;
+            serverUrlInput.value = detectedValue;
+            showToast("QRコードを認識しました！", "success");
+            stopQrScanning();
+          }
+        } catch (e) {
+          // ignore scan error
+        }
+      }, 500);
+    } else {
+      showToast("カメラを起動しました。QRのURLを確認して入力してください", "info");
+    }
+  } catch (err) {
+    console.error("Camera access failed:", err);
+    showToast("カメラの起動に失敗しました", "error");
+  }
+});
+
+stopQrBtn.addEventListener("click", () => {
+  stopQrScanning();
+});
+
+function stopQrScanning() {
+  if (qrScanInterval) {
+    clearInterval(qrScanInterval);
+    qrScanInterval = null;
+  }
+  if (qrStream) {
+    qrStream.getTracks().forEach((track) => track.stop());
+    qrStream = null;
+  }
+  if (qrReaderContainer) {
+    qrReaderContainer.classList.add("hidden");
+  }
+}
+
 // Initial render
 renderMemoList();
+

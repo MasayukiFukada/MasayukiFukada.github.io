@@ -20,14 +20,31 @@
     <body>
         <header>
             <h1>Back of Flyer Memo</h1>
-            <button
-                id="export-button"
-                class="header-button"
-                title="クリップボードにエクスポート"
-            >
-                <span class="material-icons">content_copy</span>
-            </button>
+            <div class="header-actions">
+                <button
+                    id="send-button"
+                    class="header-button"
+                    title="ExpenditureBookへ直接送信"
+                >
+                    <span class="material-icons">send</span>
+                </button>
+                <button
+                    id="export-button"
+                    class="header-button"
+                    title="クリップボードにコピー"
+                >
+                    <span class="material-icons">content_copy</span>
+                </button>
+                <button
+                    id="settings-button"
+                    class="header-button"
+                    title="連携・ペアリング設定"
+                >
+                    <span class="material-icons">settings</span>
+                </button>
+            </div>
         </header>
+
         <main>
             <ul id="memo-list"></ul>
         </main>
@@ -101,7 +118,51 @@
                 </form>
             </div>
         </div>
+
+        <div id="settings-popup" class="popup-overlay">
+            <div class="popup-content">
+                <h2>連携設定 (ExpenditureBook)</h2>
+                <p class="settings-desc">
+                    PCのExpenditureBook画面に表示されたQRコードをスキャン、またはURLを設定してください。
+                </p>
+                <form id="settings-form">
+                    <label for="server-url-input">接続先サーバーURL:</label>
+                    <input
+                        type="url"
+                        id="server-url-input"
+                        placeholder="http://expenditure.local:3000"
+                        required
+                    />
+                    <div class="settings-helper-buttons">
+                        <button type="button" id="paste-url-btn" class="secondary-button">
+                            <span class="material-icons">content_paste</span> クリップボードから貼付
+                        </button>
+                        <button type="button" id="scan-qr-btn" class="secondary-button">
+                            <span class="material-icons">qr_code_scanner</span> QRスキャン
+                        </button>
+                    </div>
+
+                    <div id="qr-reader-container" class="qr-reader-container hidden">
+                        <video id="qr-video" playsinline></video>
+                        <button type="button" id="stop-qr-btn" class="danger-button">
+                            スキャン停止
+                        </button>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit">設定を保存</button>
+                        <button type="button" id="cancel-settings">
+                            閉じる
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="toast" class="toast"></div>
+
         <script src="./db.js" defer></script>
+
         <script src="./app.js" defer></script>
     </body>
 </html>
