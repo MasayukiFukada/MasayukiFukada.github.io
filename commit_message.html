@@ -123,8 +123,71 @@
         margin-top: 0.35rem;
         line-height: 1.25;
       }
-      /* Type Specific Colors (Accessible in both Light and Dark modes) */
-      .type-color-feat { color: #2563eb; }
+      /* Tooltip Styles */
+      .type-chip {
+        position: relative;
+      }
+      .type-tooltip {
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%) translateY(4px);
+        background: #0f172a;
+        color: #f8fafc;
+        padding: 0.45rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.74rem;
+        font-weight: 500;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        z-index: 100;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        line-height: 1.3;
+      }
+      .type-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: #0f172a transparent transparent transparent;
+      }
+      .type-chip:hover .type-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+      }
+      /* Selected Type Guide Box under Type Grid */
+      .type-guide-box {
+        background: var(--bulma-scheme-main-ter);
+        border: 1px solid var(--bulma-border-weak);
+        border-radius: 8px;
+        padding: 0.6rem 0.85rem;
+        font-size: 0.78rem;
+        margin-top: 0.6rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+      }
+      .cmd-btn-group {
+        display: flex;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+      }
+      .cmd-btn {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.35rem 0.65rem;
+        border-radius: 6px;
+      }
       .type-color-fix { color: #16a34a; }
       .type-color-docs { color: #0284c7; }
       .type-color-style { color: #7c3aed; }
@@ -246,124 +309,140 @@
                   <div class="type-grid" id="typeGrid">
                     <!-- feat -->
                     <label class="type-chip">
-                      <input type="radio" name="rb_type" value="feat" checked onchange="buildMessage()" />
+                      <input type="radio" name="rb_type" value="feat" checked onchange="onTypeChange()" />
                       <div class="type-chip-inner">
                         <span class="type-chip-title type-color-feat">
                           <i class="fa-solid fa-circle-up"></i> feat
                         </span>
                         <span class="type-chip-desc">新機能の追加</span>
                       </div>
+                      <span class="type-tooltip">💡 こんな時: ユーザー向け新機能の追加、新しいAPI・画面・機能の実装</span>
                     </label>
 
                     <!-- fix -->
                     <label class="type-chip">
-                      <input type="radio" name="rb_type" value="fix" onchange="buildMessage()" />
+                      <input type="radio" name="rb_type" value="fix" onchange="onTypeChange()" />
                       <div class="type-chip-inner">
                         <span class="type-chip-title type-color-fix">
                           <i class="fa-solid fa-bug"></i> fix
                         </span>
                         <span class="type-chip-desc">バグ修正</span>
                       </div>
+                      <span class="type-tooltip">💡 こんな時: 意図しない不具合・例外エラーや表示崩れの解消</span>
                     </label>
 
                     <!-- docs -->
                     <label class="type-chip">
-                      <input type="radio" name="rb_type" value="docs" onchange="buildMessage()" />
+                      <input type="radio" name="rb_type" value="docs" onchange="onTypeChange()" />
                       <div class="type-chip-inner">
                         <span class="type-chip-title type-color-docs">
                           <i class="fa-solid fa-book"></i> docs
                         </span>
                         <span class="type-chip-desc">ドキュメント変更</span>
                       </div>
+                      <span class="type-tooltip">💡 こんな時: README、Wiki、関数コメント（JSDoc等）の加筆・修正</span>
                     </label>
 
                     <!-- style -->
                     <label class="type-chip">
-                      <input type="radio" name="rb_type" value="style" onchange="buildMessage()" />
+                      <input type="radio" name="rb_type" value="style" onchange="onTypeChange()" />
                       <div class="type-chip-inner">
                         <span class="type-chip-title type-color-style">
                           <i class="fa-solid fa-wand-magic-sparkles"></i> style
                         </span>
                         <span class="type-chip-desc">コード書式・空白</span>
                       </div>
+                      <span class="type-tooltip">💡 こんな時: 挙動を変えないコード整形（インデント、Prettier、空白調整等）</span>
                     </label>
 
                     <!-- refactor -->
                     <label class="type-chip">
-                      <input type="radio" name="rb_type" value="refactor" onchange="buildMessage()" />
+                      <input type="radio" name="rb_type" value="refactor" onchange="onTypeChange()" />
                       <div class="type-chip-inner">
                         <span class="type-chip-title type-color-refactor">
                           <i class="fa-solid fa-industry"></i> refactor
                         </span>
                         <span class="type-chip-desc">リファクタリング</span>
                       </div>
+                      <span class="type-tooltip">💡 こんな時: バグ修正や機能追加を含まない設計改善・関数分割・整理</span>
                     </label>
 
                     <!-- perf -->
                     <label class="type-chip">
-                      <input type="radio" name="rb_type" value="perf" onchange="buildMessage()" />
+                      <input type="radio" name="rb_type" value="perf" onchange="onTypeChange()" />
                       <div class="type-chip-inner">
                         <span class="type-chip-title type-color-perf">
                           <i class="fa-solid fa-gauge-high"></i> perf
                         </span>
                         <span class="type-chip-desc">パフォーマンス改善</span>
                       </div>
+                      <span class="type-tooltip">💡 こんな時: 計算量削減、クエリ最適化、キャッシュ導入など速度やメモリ改善</span>
                     </label>
 
                     <!-- test -->
                     <label class="type-chip">
-                      <input type="radio" name="rb_type" value="test" onchange="buildMessage()" />
+                      <input type="radio" name="rb_type" value="test" onchange="onTypeChange()" />
                       <div class="type-chip-inner">
                         <span class="type-chip-title type-color-test">
                           <i class="fa-solid fa-vial-circle-check"></i> test
                         </span>
                         <span class="type-chip-desc">テスト追加・修正</span>
                       </div>
+                      <span class="type-tooltip">💡 こんな時: ユニットテストやE2Eテストの新規追加、既存テストの修正</span>
                     </label>
 
                     <!-- build -->
                     <label class="type-chip">
-                      <input type="radio" name="rb_type" value="build" onchange="buildMessage()" />
+                      <input type="radio" name="rb_type" value="build" onchange="onTypeChange()" />
                       <div class="type-chip-inner">
                         <span class="type-chip-title type-color-build">
                           <i class="fa-solid fa-cubes"></i> build
                         </span>
                         <span class="type-chip-desc">ビルド・外部依存</span>
                       </div>
+                      <span class="type-tooltip">💡 こんな時: npmパッケージ追加/更新、webpack/vite/tsconfig等設定の変更</span>
                     </label>
 
                     <!-- ci -->
                     <label class="type-chip">
-                      <input type="radio" name="rb_type" value="ci" onchange="buildMessage()" />
+                      <input type="radio" name="rb_type" value="ci" onchange="onTypeChange()" />
                       <div class="type-chip-inner">
                         <span class="type-chip-title type-color-ci">
                           <i class="fa-solid fa-heart-pulse"></i> ci
                         </span>
                         <span class="type-chip-desc">CI/CD環境・設定</span>
                       </div>
+                      <span class="type-tooltip">💡 こんな時: GitHub Actions等のワークフロー設定やCI自動パイプライン変更</span>
                     </label>
 
                     <!-- chore -->
                     <label class="type-chip">
-                      <input type="radio" name="rb_type" value="chore" onchange="buildMessage()" />
+                      <input type="radio" name="rb_type" value="chore" onchange="onTypeChange()" />
                       <div class="type-chip-inner">
                         <span class="type-chip-title type-color-chore">
                           <i class="fa-solid fa-wrench"></i> chore
                         </span>
                         <span class="type-chip-desc">その他の雑務</span>
                       </div>
+                      <span class="type-tooltip">💡 こんな時: .gitignore更新、補助スクリプト作成など本番外の日常業務</span>
                     </label>
 
                     <!-- revert -->
                     <label class="type-chip">
-                      <input type="radio" name="rb_type" value="revert" onchange="buildMessage()" />
+                      <input type="radio" name="rb_type" value="revert" onchange="onTypeChange()" />
                       <div class="type-chip-inner">
                         <span class="type-chip-title type-color-revert">
                           <i class="fa-solid fa-rotate-left"></i> revert
                         </span>
                         <span class="type-chip-desc">コミット取り消し</span>
                       </div>
+                      <span class="type-tooltip">💡 こんな時: 問題があった過去のコミットを打ち消す時（git revert）</span>
                     </label>
+                  </div>
+                  <!-- Selected Type Guide Box -->
+                  <div id="typeGuideBox" class="type-guide-box">
+                    <span class="icon is-small has-text-warning"><i class="fa-solid fa-lightbulb"></i></span>
+                    <span id="typeGuideText"><strong>feat</strong>: ユーザー向け新機能の追加、新しいAPI・画面・機能の実装時に使用します</span>
                   </div>
                 </div>
 
@@ -495,15 +574,32 @@
                       placeholder="フォームに入力するとここにメッセージがリアルタイムで組み立てられます..."
                     ></textarea>
                   </div>
-                  <div class="buttons is-flex">
+                  <div class="buttons is-flex mb-3">
                     <button id="copyBtn" class="button is-primary is-flex-grow-1" onclick="copyToClipboard()">
                       <span class="icon" id="copyIcon"><i class="fa-regular fa-copy"></i></span>
-                      <span id="copyLabel" class="has-text-weight-bold">コピー</span>
+                      <span id="copyLabel" class="has-text-weight-bold">メッセージをコピー</span>
                     </button>
                     <button class="button is-light" onclick="clearForm()" title="フォームを初期状態に戻す">
                       <span class="icon"><i class="fa-solid fa-rotate-left"></i></span>
                       <span>クリア</span>
                     </button>
+                  </div>
+
+                  <!-- Command Copy Buttons -->
+                  <div class="field">
+                    <label class="label is-size-7 has-text-grey mb-1">
+                      <i class="fa-solid fa-terminal mr-1"></i>CLI コマンドとしてコピー
+                    </label>
+                    <div class="cmd-btn-group">
+                      <button id="copyGitBtn" class="button is-small is-dark is-outlined cmd-btn is-flex-grow-1" onclick="copyGitCommand()" title="git commit -m 形式でコピー">
+                        <span class="icon is-small has-text-danger"><i class="fa-brands fa-git-alt"></i></span>
+                        <span>git commit</span>
+                      </button>
+                      <button id="copyJjBtn" class="button is-small is-link is-outlined cmd-btn is-flex-grow-1" onclick="copyJjCommand()" title="jj describe -m 形式でコピー">
+                        <span class="icon is-small"><i class="fa-solid fa-code-branch"></i></span>
+                        <span>jj describe</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -542,6 +638,22 @@
       const copyBtn = document.getElementById('copyBtn');
       const copyIcon = document.getElementById('copyIcon');
       const copyLabel = document.getElementById('copyLabel');
+      const typeGuideText = document.getElementById('typeGuideText');
+
+      // 分類ガイドの辞書
+      const typeGuideDict = {
+        feat: 'ユーザー向け新機能の追加、新しいAPI・画面・機能の実装時に使用します',
+        fix: '意図しない不具合・例外エラーや表示崩れの修正時に使用します',
+        docs: 'README、Wiki、関数コメント（JSDoc等）の加筆・修正時に使用します',
+        style: 'ロジックを変えず、インデント・改行・セミコロン等のコード書式整形時に使用します',
+        refactor: 'バグ修正や機能追加を含まない、コードの整理・構造改善・関数分割時に使用します',
+        perf: '計算量削減、クエリ最適化、キャッシュ導入など速度やメモリ改善時に使用します',
+        test: 'ユニットテストやE2Eテストの新規追加、既存テストコードの不備修正時に使用します',
+        build: 'npmパッケージの追加/更新、webpack/vite/tsconfigなどビルド・依存関係変更時に使用します',
+        ci: 'GitHub Actions等のワークフロー設定やCI自動パイプライン変更時に使用します',
+        chore: '.gitignore更新、補助スクリプト作成など本番外の日常雑務に使用します',
+        revert: '問題があった過去のコミットを打ち消す（git revert）時に使用します'
+      };
 
       // イベントリスナー設定
       window.addEventListener('DOMContentLoaded', () => {
@@ -555,8 +667,23 @@
         });
 
         initTheme();
-        buildMessage();
+        onTypeChange();
       });
+
+      function onTypeChange() {
+        let currentType = 'feat';
+        rbTypes.forEach((item) => {
+          if (item.checked) {
+            currentType = item.value;
+          }
+        });
+
+        if (typeGuideText && typeGuideDict[currentType]) {
+          typeGuideText.innerHTML = `<strong>${currentType}</strong>: ${typeGuideDict[currentType]}`;
+        }
+
+        buildMessage();
+      }
 
       function onBreakingToggle() {
         if (cbBreaking.checked) {
@@ -634,51 +761,121 @@
       // クリップボードへコピー
       async function copyToClipboard() {
         if (!taOutput.value.trim()) {
-          Toastify({
-            text: 'コピーするメッセージが空です',
-            duration: 2000,
-            gravity: 'bottom',
-            position: 'right',
-            style: {
-              background: 'linear-gradient(to right, #e74c3c, #c0392b)',
-            },
-          }).showToast();
+          showToast('コピーするメッセージが空です', true);
           return;
         }
 
         try {
           await navigator.clipboard.writeText(taOutput.value);
-          copySuccessFeedback();
+          copySuccessFeedback('コミットメッセージをコピーしました！');
         } catch (err) {
-          // フォールバック
           taOutput.select();
           document.execCommand('copy');
-          copySuccessFeedback();
+          copySuccessFeedback('コミットメッセージをコピーしました！');
         }
       }
 
-      function copySuccessFeedback() {
-        copyIcon.innerHTML = '<i class="fa-solid fa-check"></i>';
-        copyLabel.textContent = 'コピー完了!';
-        copyBtn.classList.remove('is-primary');
-        copyBtn.classList.add('is-success');
+      // コマンド生成用の構成要素を分割取得
+      function buildCommitParts() {
+        let typeVal = 'feat';
+        rbTypes.forEach((item) => {
+          if (item.checked) typeVal = item.value;
+        });
 
+        let header = typeVal;
+        if (txScope.value.trim().length > 0) header += `(${txScope.value.trim()})`;
+        if (cbBreaking.checked) header += '!';
+        header += ': ' + txTitle.value.trim();
+
+        const parts = [header];
+
+        if (taBody.value.trim().length > 0) {
+          parts.push(taBody.value.trim());
+        }
+
+        const footerParts = [];
+        if (cbBreaking.checked && txBreaking.value.trim().length > 0) {
+          footerParts.push('BREAKING CHANGE: ' + txBreaking.value.trim());
+        }
+        if (txRef.value.trim().length > 0) {
+          footerParts.push('Refs: ' + txRef.value.trim());
+        }
+        if (txTicket.value.trim().length > 0) {
+          footerParts.push('#' + txTicket.value.trim().replace(/^#/, ''));
+        }
+
+        if (footerParts.length > 0) {
+          parts.push(footerParts.join('\n'));
+        }
+
+        return parts;
+      }
+
+      // git commit -m コマンド形式でコピー (fish, bash, zsh 共通互換)
+      async function copyGitCommand() {
+        if (!txTitle.value.trim()) {
+          showToast('タイトル (Subject) を入力してください', true);
+          return;
+        }
+
+        const parts = buildCommitParts();
+        const gitCmd = 'git commit ' + parts.map(p => `-m "${p.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(' ');
+
+        try {
+          await navigator.clipboard.writeText(gitCmd);
+          showToast('git commit コマンドをコピーしました！');
+        } catch (err) {
+          showToast('クリップボードへのコピーに失敗しました', true);
+        }
+      }
+
+      // jj describe -m コマンド形式でコピー (fish, bash, zsh 共通互換)
+      async function copyJjCommand() {
+        if (!txTitle.value.trim()) {
+          showToast('タイトル (Subject) を入力してください', true);
+          return;
+        }
+
+        const parts = buildCommitParts();
+        // jj describe でも -m を複数渡すことで空行区切りで正しく設定可能 (fish shell でもエラーにならない)
+        const jjCmd = 'jj describe ' + parts.map(p => `-m "${p.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(' ');
+
+        try {
+          await navigator.clipboard.writeText(jjCmd);
+          showToast('jj describe コマンドをコピーしました！');
+        } catch (err) {
+          showToast('クリップボードへのコピーに失敗しました', true);
+        }
+      }
+
+      function showToast(text, isError = false) {
         Toastify({
-          text: 'コミットメッセージをコピーしました！',
+          text: text,
           duration: 2500,
           gravity: 'bottom',
           position: 'right',
           style: {
-            background: 'linear-gradient(to right, #00b09b, #96c93d)',
+            background: isError
+              ? 'linear-gradient(to right, #ef4444, #dc2626)'
+              : 'linear-gradient(to right, #00b09b, #96c93d)',
             borderRadius: '8px',
             fontFamily: 'var(--font-sans)',
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
           },
         }).showToast();
+      }
+
+      function copySuccessFeedback(msg) {
+        copyIcon.innerHTML = '<i class="fa-solid fa-check"></i>';
+        copyLabel.textContent = 'コピー完了!';
+        copyBtn.classList.remove('is-primary');
+        copyBtn.classList.add('is-success');
+
+        showToast(msg);
 
         setTimeout(() => {
           copyIcon.innerHTML = '<i class="fa-regular fa-copy"></i>';
-          copyLabel.textContent = 'コピー';
+          copyLabel.textContent = 'メッセージをコピー';
           copyBtn.classList.remove('is-success');
           copyBtn.classList.add('is-primary');
         }, 2000);
@@ -695,18 +892,9 @@
         taBody.value = '';
         txRef.value = '';
         txTicket.value = '';
-        buildMessage();
+        onTypeChange();
 
-        Toastify({
-          text: 'フォームをクリアしました',
-          duration: 1500,
-          gravity: 'bottom',
-          position: 'right',
-          style: {
-            background: '#718096',
-            borderRadius: '8px',
-          },
-        }).showToast();
+        showToast('フォームをクリアしました');
       }
 
       // ダーク / ライトテーマ管理
