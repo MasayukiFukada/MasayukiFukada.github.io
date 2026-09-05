@@ -1,5 +1,5 @@
-// Build: 2026-09-05 21:16:00
-const CACHE_NAME = 'docannotator-pwa-cache-20260905211600';
+// Build: 2026-09-05 21:43:00
+const CACHE_NAME = 'docannotator-pwa-cache-20260905214300';
 const urlsToCache = [
   './',
   './index.html',
