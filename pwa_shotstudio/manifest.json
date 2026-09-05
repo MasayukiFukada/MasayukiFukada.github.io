@@ -1,0 +1,17 @@
+{
+  "name": "図解スクショ工房 - Diagram Shot Studio",
+  "short_name": "スクショ工房",
+  "description": "Wikiやマニュアル作成用のスクリーンショットに注釈や拡大ルーペ、連番バッジ、モザイクを簡単加工できるPWA",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#1e1e2e",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "./icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

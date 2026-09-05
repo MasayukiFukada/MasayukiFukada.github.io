@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>図解スクショ工房 - Wiki/手順書用 画像加工</title>
+  <meta name="description" content="Wikiやマニュアル作成用のスクリーンショットに注釈やルーペ、番号、モザイク・ぼかしを簡単加工できるPWA">
+  <meta name="theme-color" content="#4f46e5">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" href="./icons/icon-512x512.png">
+  <link rel="apple-touch-icon" href="./icons/icon-512x512.png">
+  <link rel="stylesheet" href="./style.css?v=20260905211600">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-brand">
+      <img src="./icons/icon-512x512.png" alt="Icon">
+      <h1>図解スクショ工房</h1>
+      <span class="badge">Wiki/手順書</span>
+    </div>
+
+    <div class="header-actions">
+      <button id="btn-new-image" class="btn" title="新しい画像を開く">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        <span>画像変更</span>
+      </button>
+
+      <button id="btn-copy" class="btn btn-primary" title="画像をクリップボードにコピー (そのまま貼り付け可能)">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        <span>コピー</span>
+      </button>
+
+      <button id="btn-download" class="btn btn-success" title="PNG画像をダウンロード保存">
+        <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+        <span>保存</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- App Toolbar -->
+  <nav class="app-toolbar">
+    <!-- Tools -->
+    <div class="tool-group">
+      <button class="tool-btn" data-tool="select" title="選択・移動 [V]">
+        <svg viewBox="0 0 24 24"><path d="M7 2l12 11.2-5.8.5 3.3 7.3-2.2 1-3.2-7.4L7 18.5V2z"/></svg>
+      </button>
+      <button class="tool-btn active" data-tool="rect" title="四角形枠">
+        <svg viewBox="0 0 24 24"><path d="M3 3v18h18V3H3zm16 16H5V5h14v14z"/></svg>
+      </button>
+      <button class="tool-btn" data-tool="rounded-rect" title="角丸四角形枠">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <button class="tool-btn" data-tool="circle" title="円・楕円枠">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>
+      </button>
+      <button class="tool-btn" data-tool="arrow" title="矢印 (クリック地点が先端)">
+        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+      </button>
+      <button class="tool-btn" data-tool="text" title="テキスト入力">
+        <svg viewBox="0 0 24 24"><path d="M5 4v3h5.5v12h3V7H19V4z"/></svg>
+      </button>
+      <button class="tool-btn" data-tool="loupe" title="引き出し拡大ルーペ (カーソルが拡大元の円になります)">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zm.5-7H9v2H7v1h2v2h1v-2h2V9h-2z"/></svg>
+      </button>
+      <button class="tool-btn" data-tool="badge" title="連番ステップバッジ (スタンプのようにクリック配置)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><text x="12" y="16" font-size="12" font-weight="bold" fill="currentColor" text-anchor="middle">1</text></svg>
+      </button>
+      <button class="tool-btn" data-tool="mosaic" title="マスキング (モザイク / ぼかし)">
+        <svg viewBox="0 0 24 24"><path d="M3 3h4v4H3zm4 4h4v4H7zm4-4h4v4h-4zm4 4h4v4h-4zm-4 4h4v4h-4zm4 4h4v4h-4zm-8 0h4v4H7zm-4 4h4v4H3zm14 0h4v4h-4zm-4-12h4v4h-4z"/></svg>
+      </button>
+    </div>
+
+    <div class="toolbar-separator"></div>
+
+    <!-- Color Presets -->
+    <div class="color-picker-group" title="色を選択">
+      <div class="color-dot active" style="background-color: #ef4444;" data-color="#ef4444"></div>
+      <div class="color-dot" style="background-color: #f97316;" data-color="#f97316"></div>
+      <div class="color-dot" style="background-color: #3b82f6;" data-color="#3b82f6"></div>
+      <div class="color-dot" style="background-color: #10b981;" data-color="#10b981"></div>
+      <div class="color-dot" style="background-color: #eab308;" data-color="#eab308"></div>
+      <div class="color-dot" style="background-color: #ffffff;" data-color="#ffffff"></div>
+      <div class="color-dot" style="background-color: #000000;" data-color="#000000"></div>
+      <div class="custom-color-wrapper" title="カスタムカラー">
+        <input type="color" id="custom-color" value="#ef4444">
+      </div>
+    </div>
+
+    <div class="toolbar-separator"></div>
+
+    <!-- Line Width -->
+    <div class="line-width-selector" title="線の太さ">
+      <button class="width-btn" data-width="3" title="細い (3px)">
+        <div class="width-indicator" style="width: 14px; height: 3px;"></div>
+      </button>
+      <button class="width-btn active" data-width="6" title="標準 (6px)">
+        <div class="width-indicator" style="width: 14px; height: 6px;"></div>
+      </button>
+      <button class="width-btn" data-width="10" title="太い (10px)">
+        <div class="width-indicator" style="width: 14px; height: 10px;"></div>
+      </button>
+    </div>
+
+    <div class="toolbar-separator"></div>
+
+    <!-- Tool Specific Options -->
+    <div id="loupe-options" class="tool-options is-hidden">
+      <span>ルーペ倍率:</span>
+      <select id="loupe-zoom">
+        <option value="2">2.0x</option>
+        <option value="2.5" selected>2.5x</option>
+        <option value="3">3.0x</option>
+        <option value="4">4.0x</option>
+      </select>
+    </div>
+
+    <div id="badge-options" class="tool-options is-hidden">
+      <span>次の番号:</span>
+      <input type="number" id="badge-counter" value="1" min="1" max="999" style="width: 50px;">
+      <button id="btn-reset-badge" class="btn" style="padding: 2px 6px; font-size: 0.75rem;">1にリセット</button>
+    </div>
+
+    <div id="mosaic-options" class="tool-options is-hidden">
+      <span>効果:</span>
+      <select id="mask-type">
+        <option value="pixel" selected>モザイク</option>
+        <option value="blur">ぼかし (Blur)</option>
+      </select>
+    </div>
+
+    <div class="toolbar-separator"></div>
+
+    <!-- Undo / Redo / Delete -->
+    <div class="tool-group">
+      <button id="btn-undo" class="tool-btn" title="元に戻す [Ctrl+Z]" disabled>
+        <svg viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+      </button>
+      <button id="btn-redo" class="tool-btn" title="やり直す [Ctrl+Y]" disabled>
+        <svg viewBox="0 0 24 24"><path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/></svg>
+      </button>
+      <button id="btn-delete" class="tool-btn" title="選択した図形を削除 [Delete]" disabled>
+        <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Workspace -->
+  <main class="workspace" id="workspace">
+    <!-- Initial Dropzone -->
+    <div class="dropzone" id="dropzone">
+      <svg class="dropzone-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7l-3 3.72L9 13l-3 4h12l-4-5z"/>
+      </svg>
+      <div class="dropzone-title">画像を開く / 貼り付け</div>
+      <div class="dropzone-desc">
+        <kbd>Ctrl</kbd> + <kbd>V</kbd> でクリップボードの画像を直接貼り付け<br>
+        またはここに画像をドラッグ＆ドロップ（クリックして選択）
+      </div>
+      <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
+        ファイルを選択
+      </button>
+      <input type="file" id="file-input" accept="image/*" class="is-hidden">
+    </div>
+
+    <!-- Active Canvas -->
+    <div class="canvas-wrapper is-hidden" id="canvas-wrapper">
+      <canvas id="annotation-canvas"></canvas>
+      <div id="text-editor-container" class="text-editor-container is-hidden">
+        <textarea id="text-editor-overlay" rows="2" placeholder="テキストを入力..."></textarea>
+        <div class="text-editor-toolbar">
+          <span class="text-editor-tip">Enterで確定 / Shift+Enterで改行</span>
+          <div class="text-editor-btns">
+            <button type="button" id="btn-text-cancel" class="btn btn-sm">取消</button>
+            <button type="button" id="btn-text-ok" class="btn btn-sm btn-primary">確定</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Status Bar -->
+  <footer class="status-bar">
+    <div id="status-info">画像未読込</div>
+    <div>ショートカット: 貼付 [Ctrl+V] / 取消 [Ctrl+Z] / 再実行 [Ctrl+Y] / 削除 [Del]</div>
+  </footer>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">
+    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+    <span id="toast-msg"></span>
+  </div>
+
+  <script src="./app.js?v=20260905211600"></script>
+</body>
+</html>
