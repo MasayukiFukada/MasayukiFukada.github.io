@@ -1,0 +1,3 @@
+[submodule ".agents/plugins/ai_programming_practice"]
+	path = .agents/plugins/ai_programming_practice
+	url = https://github.com/MasayukiFukada/ai_programming_practice.git
