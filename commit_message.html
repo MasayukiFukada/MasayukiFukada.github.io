@@ -1,272 +1,756 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja" data-theme="system">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Conventional Commit Message Generator</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.1/css/bulma.min.css">
-    <link href="https://use.fontawesome.com/releases/v6.5.2/css/all.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <meta
+      name="description"
+      content="Conventional Commits 形式に従った標準的で読みやすいコミットメッセージを素早く作成できるジェネレーターツールです。"
+    />
+    <!-- Bulma 1.0.1 -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.1/css/bulma.min.css"
+    />
+    <!-- Font Awesome 6 -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <!-- Toastify CSS & JS -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --font-sans: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+      }
+      body {
+        font-family: var(--font-sans);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--bulma-scheme-main-bis);
+      }
+      main {
+        flex: 1;
+      }
+      .font-mono {
+        font-family: var(--font-mono);
+      }
+      .theme-toggle-btn {
+        border-radius: 9999px;
+      }
+      .generator-card {
+        border-radius: 12px;
+        background: var(--bulma-scheme-main);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--bulma-border-weak);
+      }
+      /* Type Chip Radio Styles */
+      .type-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+        gap: 0.6rem;
+      }
+      .type-chip {
+        display: block;
+        cursor: pointer;
+        position: relative;
+        user-select: none;
+      }
+      .type-chip input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+      }
+      .type-chip-inner {
+        border: 1.5px solid var(--bulma-border-weak);
+        background: var(--bulma-scheme-main);
+        border-radius: 8px;
+        padding: 0.6rem 0.75rem;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .type-chip:hover .type-chip-inner {
+        border-color: var(--bulma-primary);
+        background: var(--bulma-scheme-main-ter);
+      }
+      .type-chip input[type="radio"]:checked + .type-chip-inner {
+        border-color: var(--bulma-primary);
+        background: var(--bulma-primary-light);
+        box-shadow: 0 0 0 2px rgba(var(--bulma-primary-rgb, 0, 209, 178), 0.2);
+      }
+      .type-chip-title {
+        font-weight: 600;
+        font-size: 0.88rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .type-chip-title i {
+        font-size: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.04);
+        flex-shrink: 0;
+        transition: background 0.2s ease;
+      }
+      html[data-theme="dark"] .type-chip-title i {
+        background: rgba(255, 255, 255, 0.09);
+      }
+      .type-chip-desc {
+        font-size: 0.72rem;
+        color: var(--bulma-text-weak, #7a7a7a);
+        margin-top: 0.35rem;
+        line-height: 1.25;
+      }
+      /* Type Specific Colors (Accessible in both Light and Dark modes) */
+      .type-color-feat { color: #2563eb; }
+      .type-color-fix { color: #16a34a; }
+      .type-color-docs { color: #0284c7; }
+      .type-color-style { color: #7c3aed; }
+      .type-color-refactor { color: #d97706; }
+      .type-color-perf { color: #dc2626; }
+      .type-color-test { color: #0d9488; }
+      .type-color-build { color: #ea580c; }
+      .type-color-ci { color: #db2777; }
+      .type-color-chore { color: #475569; }
+      .type-color-revert { color: #4f46e5; }
+
+      /* Dark Mode High-Visibility Pastel Colors */
+      html[data-theme="dark"] .type-color-feat { color: #93c5fd; }
+      html[data-theme="dark"] .type-color-fix { color: #86efac; }
+      html[data-theme="dark"] .type-color-docs { color: #7dd3fc; }
+      html[data-theme="dark"] .type-color-style { color: #d8b4fe; }
+      html[data-theme="dark"] .type-color-refactor { color: #fde047; }
+      html[data-theme="dark"] .type-color-perf { color: #fca5a5; }
+      html[data-theme="dark"] .type-color-test { color: #5eead4; }
+      html[data-theme="dark"] .type-color-build { color: #fdba74; }
+      html[data-theme="dark"] .type-color-ci { color: #f9a8d4; }
+      html[data-theme="dark"] .type-color-chore { color: #cbd5e1; }
+      html[data-theme="dark"] .type-color-revert { color: #a5b4fc; }
+
+      html[data-theme="dark"] .type-chip-inner {
+        background: var(--bulma-scheme-main-bis);
+        border-color: var(--bulma-border);
+      }
+      html[data-theme="dark"] .type-chip:hover .type-chip-inner {
+        background: var(--bulma-scheme-main-ter);
+        border-color: var(--bulma-primary);
+      }
+      html[data-theme="dark"] .type-chip input[type="radio"]:checked + .type-chip-inner {
+        background: rgba(0, 209, 178, 0.16);
+        border-color: var(--bulma-primary);
+      }
+      /* Sticky Preview */
+      .sticky-preview {
+        position: sticky;
+        top: 1.5rem;
+      }
+      .preview-textarea {
+        font-family: var(--font-mono);
+        font-size: 0.875rem;
+        line-height: 1.6;
+        min-height: 380px;
+        resize: vertical;
+        background: var(--bulma-scheme-main-ter);
+        border-color: var(--bulma-border-weak);
+        border-radius: 8px;
+      }
+      .breaking-box {
+        transition: all 0.25s ease;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        background: var(--bulma-danger-light);
+        border: 1px dashed var(--bulma-danger);
+      }
+      .breaking-box.is-hidden {
+        display: none !important;
+      }
+    </style>
   </head>
   <body>
-    <div id="app" class="section" style="min-height: 100vh;">
-      <div class="section">
-        <h1 class="title">Conventional Commit Message Generator</h1>
-      </div>
-      <div class="columns">
-        <div class="column">
-          <div>
-            <a href="https://www.conventionalcommits.org/ja/v1.0.0/">Conventional Commit について - What is Conventional Commit</a>
-          </div>
-          <div class="card">
-            <div class="card-content">
-              <textarea id="ta_output" class="textarea is-success" readonly style="height: 700px;"></textarea>
-            </div>
-            <div class="card-footer">
-              <a href="#" class="card-footer-item" onclick="clearForm()">クリア - clear</a>
-              <a href="#" class="card-footer-item has-background-primary-light has-text-link" onclick="copyToClipboard()">コピー - Copy to Clipboard</a>
+    <!-- Navigation Bar -->
+    <nav class="navbar is-transparent py-2" role="navigation" aria-label="main navigation">
+      <div class="container">
+        <div class="navbar-brand">
+          <a class="navbar-item is-size-6 has-text-weight-bold" href="./index.html">
+            <span class="icon-text">
+              <span class="icon has-text-primary"><i class="fa-solid fa-arrow-left"></i></span>
+              <span>Portal へ戻る</span>
+            </span>
+          </a>
+        </div>
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <div class="buttons">
+              <button id="themeToggle" class="button is-ghost theme-toggle-btn" aria-label="テーマ切替">
+                <span class="icon"><i id="themeIcon" class="fa-solid fa-moon"></i></span>
+              </button>
+              <a
+                href="https://www.conventionalcommits.org/ja/v1.0.0/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="button is-small is-light is-rounded"
+              >
+                <span class="icon is-small"><i class="fa-solid fa-book-bookmark"></i></span>
+                <span>仕様書 (v1.0.0)</span>
+              </a>
             </div>
           </div>
         </div>
-        <div class="column">
-          <div class="card">
-            <div class="card-content">
-              <div class="field">
-                <table>
-                  <thead>
-                    <tr>
-                      <th scope="col">分類 - Type</th>
-                      <th scope="col">用途 - Usage</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td scope="row">
-                        <label class="radio icon-text is-size-4"><input type="radio" name="rb_type" value="feat" checked onclick="buildMessage()"> <span class="icon has-text-info"><i class="fas fa-circle-up"></i></span> Features</label>
-                      </td>
-                      <td><label class="is-size-5">新機能の追加</label></td>
-                    </tr>
-                    <tr>
-                      <td scope="row">
-                        <label class="radio icon-text is-size-4"><input type="radio" name="rb_type" value="fix" onclick="buildMessage()"> <span class="icon has-text-success"><i class="fas fa-bug"></i></span> Bug Fixes</label>
-                      </td>
-                      <td><label class="is-size-5">バグの修正</label></td>
-                    </tr>
-                    <tr>
-                      <td scope="row">
-                        <label class="radio icon-text is-size-4"><input type="radio" name="rb_type" value="docs" onclick="buildMessage()"> <span class="icon"><i class="fas fa-book"></i></span> Documentation</label>
-                      </td>
-                      <td><label class="is-size-5">ドキュメントの変更</label></td>
-                    </tr>
-                    <tr>
-                      <td scope="row">
-                        <label class="radio icon-text is-size-4"><input type="radio" name="rb_type" value="style" onclick="buildMessage()"> <span class="icon"><i class="fas fa-wand-sparkles"></i></span> Styles</label>
-                      </td>
-                      <td><label class="is-size-5">コードのスタイル変更(改行コードなど)</label></td>
-                    </tr>
-                    <tr>
-                      <td scope="row">
-                        <label class="radio icon-text is-size-4"><input type="radio" name="rb_type" value="refactor" onclick="buildMessage()"> <span class="icon"><i class="fas fa-industry"></i></span> Refactoring</label>
-                      </td>
-                      <td><label class="is-size-5">リファクタリング(≠ バグ修正ではない)</label></td>
-                    </tr>
-                    <tr>
-                      <td scope="row">
-                        <label class="radio icon-text is-size-4"><input type="radio" name="rb_type" value="perf" onclick="buildMessage()"> <span class="icon"><i class="fas fa-chart-simple"></i></span> Performance</label>
-                      </td>
-                      <td><label class="is-size-5">パフォーマンス改善</label></td>
-                    </tr>
-                    <tr>
-                      <td scope="row">
-                        <label class="radio icon-text is-size-4"><input type="radio" name="rb_type" value="test" onclick="buildMessage()"> <span class="icon"><i class="fas fa-flask-vial"></i></span> Tests</label>
-                      </td>
-                      <td><label class="is-size-5">テストコードの追加/修正</label></td>
-                    </tr>
-                    <tr>
-                      <td scope="row">
-                        <label class="radio icon-text is-size-4"><input type="radio" name="rb_type" value="build" onclick="buildMessage()"> <span class="icon"><i class="fas fa-building"></i></span> Builds</label>
-                      </td>
-                      <td><label class="is-size-5">依存関係やビルドに関連する修正</label></td>
-                    </tr>
-                    <tr>
-                      <td scope="row">
-                        <label class="radio icon-text is-size-4"><input type="radio" name="rb_type" value="ci" onclick="buildMessage()"> <span class="icon"><i class="fas fa-heart-pulse"></i></span> Continuous Integrations</label>
-                      </td>
-                      <td><label class="is-size-5">CI/CDの追加/修正</label></td>
-                    </tr>
-                    <tr>
-                      <td scope="row">
-                        <label class="radio icon-text is-size-4"><input type="radio" name="rb_type" value="chore" onclick="buildMessage()"> <span class="icon"><i class="fas fa-fingerprint"></i></span> Chores</label>
-                      </td>
-                      <td><label class="is-size-5">その他</label></td>
-                    </tr>
-                    <tr>
-                      <td scope="row">
-                        <label class="radio icon-text is-size-4"><input type="radio" name="rb_type" value="revert" onclick="buildMessage()"> <span class="icon"><i class="fas fa-clock-rotate-left"></i></span> Reverts</label>
-                      </td>
-                      <td><label class="is-size-5">既存コミットの取り消し</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div class="field">
-                <label class="label" for="tx_scope">対象スコープ - Scope (optional)</label>
-                <div class="control has-icons-left">
-                  <input id="tx_scope" type="text" class="input" placeholder="service">
-                  <span class="icon is-small is-left">
-                    <i class="fas fa-glasses"></i>
-                  </span>
-                </div>
-              </div>
-              <div class="field">
-                <label class="label has-text-weight-bold has-text-info" for="tx_title">タイトル - Title</label>
-                <div class="control has-icons-left">
-                  <input id="tx_title" type="text" class="input is-info" placeholder="prevent racing of requests">
-                  <span class="icon is-small is-left">
-                    <i class="far fa-circle-check"></i>
-                  </span>
-                </div>
-              </div>
-              <div class="field">
-                <label class="label" for="cb_breaking">
-                  <input id="cb_breaking" type="checkbox" onclick="buildMessage()">
-                  破壊的変更を含む - Include Breaking change</label>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-content">
-              <div class="field">
-                <label class="label" for="ta_body">コミット本文 - Body (optional)</label>
-                <div class="control">
-                  <textarea id="ta_body" class="textarea" style="min-height: 300px;" placeholder="Introduce a request id and a reference to latest request. Dismiss
-incoming responses other than from latest request.
+      </div>
+    </nav>
 
-Remove timeouts which were used to mitigate the racing issue but are
-obsolete now."></textarea>
+    <main class="py-5">
+      <div class="container px-4">
+        <!-- Page Title & Header -->
+        <div class="mb-5">
+          <h1 class="title is-3 has-text-weight-bold mb-2">
+            <i class="fa-solid fa-code-commit has-text-primary mr-2"></i>Conventional Commit Message Generator
+          </h1>
+          <p class="subtitle is-6 has-text-grey">
+            Conventional Commits 規約に従った標準的で読みやすいコミットメッセージを素早く作成できます。
+          </p>
+        </div>
+
+        <div class="columns is-desktop">
+          <!-- Input Form Column -->
+          <div class="column is-7-desktop">
+            <div class="card generator-card mb-5">
+              <div class="card-content">
+                <!-- 1. Commit Type Selection -->
+                <div class="field mb-5">
+                  <label class="label is-small has-text-weight-bold mb-2">
+                    <i class="fa-solid fa-layer-group has-text-primary mr-1"></i> 分類 (Type) <span class="has-text-danger">*</span>
+                  </label>
+                  <div class="type-grid" id="typeGrid">
+                    <!-- feat -->
+                    <label class="type-chip">
+                      <input type="radio" name="rb_type" value="feat" checked onchange="buildMessage()" />
+                      <div class="type-chip-inner">
+                        <span class="type-chip-title type-color-feat">
+                          <i class="fa-solid fa-circle-up"></i> feat
+                        </span>
+                        <span class="type-chip-desc">新機能の追加</span>
+                      </div>
+                    </label>
+
+                    <!-- fix -->
+                    <label class="type-chip">
+                      <input type="radio" name="rb_type" value="fix" onchange="buildMessage()" />
+                      <div class="type-chip-inner">
+                        <span class="type-chip-title type-color-fix">
+                          <i class="fa-solid fa-bug"></i> fix
+                        </span>
+                        <span class="type-chip-desc">バグ修正</span>
+                      </div>
+                    </label>
+
+                    <!-- docs -->
+                    <label class="type-chip">
+                      <input type="radio" name="rb_type" value="docs" onchange="buildMessage()" />
+                      <div class="type-chip-inner">
+                        <span class="type-chip-title type-color-docs">
+                          <i class="fa-solid fa-book"></i> docs
+                        </span>
+                        <span class="type-chip-desc">ドキュメント変更</span>
+                      </div>
+                    </label>
+
+                    <!-- style -->
+                    <label class="type-chip">
+                      <input type="radio" name="rb_type" value="style" onchange="buildMessage()" />
+                      <div class="type-chip-inner">
+                        <span class="type-chip-title type-color-style">
+                          <i class="fa-solid fa-wand-magic-sparkles"></i> style
+                        </span>
+                        <span class="type-chip-desc">コード書式・空白</span>
+                      </div>
+                    </label>
+
+                    <!-- refactor -->
+                    <label class="type-chip">
+                      <input type="radio" name="rb_type" value="refactor" onchange="buildMessage()" />
+                      <div class="type-chip-inner">
+                        <span class="type-chip-title type-color-refactor">
+                          <i class="fa-solid fa-industry"></i> refactor
+                        </span>
+                        <span class="type-chip-desc">リファクタリング</span>
+                      </div>
+                    </label>
+
+                    <!-- perf -->
+                    <label class="type-chip">
+                      <input type="radio" name="rb_type" value="perf" onchange="buildMessage()" />
+                      <div class="type-chip-inner">
+                        <span class="type-chip-title type-color-perf">
+                          <i class="fa-solid fa-gauge-high"></i> perf
+                        </span>
+                        <span class="type-chip-desc">パフォーマンス改善</span>
+                      </div>
+                    </label>
+
+                    <!-- test -->
+                    <label class="type-chip">
+                      <input type="radio" name="rb_type" value="test" onchange="buildMessage()" />
+                      <div class="type-chip-inner">
+                        <span class="type-chip-title type-color-test">
+                          <i class="fa-solid fa-vial-circle-check"></i> test
+                        </span>
+                        <span class="type-chip-desc">テスト追加・修正</span>
+                      </div>
+                    </label>
+
+                    <!-- build -->
+                    <label class="type-chip">
+                      <input type="radio" name="rb_type" value="build" onchange="buildMessage()" />
+                      <div class="type-chip-inner">
+                        <span class="type-chip-title type-color-build">
+                          <i class="fa-solid fa-cubes"></i> build
+                        </span>
+                        <span class="type-chip-desc">ビルド・外部依存</span>
+                      </div>
+                    </label>
+
+                    <!-- ci -->
+                    <label class="type-chip">
+                      <input type="radio" name="rb_type" value="ci" onchange="buildMessage()" />
+                      <div class="type-chip-inner">
+                        <span class="type-chip-title type-color-ci">
+                          <i class="fa-solid fa-heart-pulse"></i> ci
+                        </span>
+                        <span class="type-chip-desc">CI/CD環境・設定</span>
+                      </div>
+                    </label>
+
+                    <!-- chore -->
+                    <label class="type-chip">
+                      <input type="radio" name="rb_type" value="chore" onchange="buildMessage()" />
+                      <div class="type-chip-inner">
+                        <span class="type-chip-title type-color-chore">
+                          <i class="fa-solid fa-wrench"></i> chore
+                        </span>
+                        <span class="type-chip-desc">その他の雑務</span>
+                      </div>
+                    </label>
+
+                    <!-- revert -->
+                    <label class="type-chip">
+                      <input type="radio" name="rb_type" value="revert" onchange="buildMessage()" />
+                      <div class="type-chip-inner">
+                        <span class="type-chip-title type-color-revert">
+                          <i class="fa-solid fa-rotate-left"></i> revert
+                        </span>
+                        <span class="type-chip-desc">コミット取り消し</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 2. Scope & Title -->
+                <div class="columns is-variable is-2 mb-3">
+                  <div class="column is-4">
+                    <div class="field">
+                      <label class="label is-small" for="tx_scope">
+                        対象スコープ (Scope)
+                      </label>
+                      <div class="control has-icons-left">
+                        <input id="tx_scope" type="text" class="input is-small" placeholder="例: auth, ui, api" />
+                        <span class="icon is-small is-left">
+                          <i class="fa-solid fa-bullseye"></i>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="column is-8">
+                    <div class="field">
+                      <div class="is-flex is-justify-content-space-between is-align-items-center">
+                        <label class="label is-small has-text-weight-bold" for="tx_title">
+                          タイトル (Subject) <span class="has-text-danger">*</span>
+                        </label>
+                        <span id="titleCounter" class="is-size-7 has-text-grey font-mono">0 / 50</span>
+                      </div>
+                      <div class="control has-icons-left">
+                        <input
+                          id="tx_title"
+                          type="text"
+                          class="input is-small is-info"
+                          placeholder="例: prevent racing of requests"
+                        />
+                        <span class="icon is-small is-left">
+                          <i class="fa-solid fa-pen"></i>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. Breaking Change Toggle -->
+                <div class="field mb-4">
+                  <label class="checkbox is-size-7 has-text-weight-semibold">
+                    <input id="cb_breaking" type="checkbox" onchange="onBreakingToggle()" />
+                    <span class="has-text-danger ml-1">
+                      <i class="fa-solid fa-triangle-exclamation mr-1"></i>破壊的変更を含む (Breaking Change: <code>!</code> を付与)
+                    </span>
+                  </label>
+                </div>
+
+                <!-- Breaking Detail Field (conditionally shown) -->
+                <div id="breakingBox" class="breaking-box is-hidden mb-4">
+                  <div class="field mb-0">
+                    <label class="label is-small has-text-danger has-text-weight-bold" for="tx_breaking">
+                      <i class="fa-solid fa-bolt mr-1"></i>BREAKING CHANGE の説明 (optional)
+                    </label>
+                    <div class="control has-icons-left">
+                      <input
+                        id="tx_breaking"
+                        class="input is-small is-danger"
+                        placeholder="例: `extends` key in config file is now used for extending other config files"
+                      />
+                      <span class="icon is-small is-left">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 4. Body -->
+                <div class="field mb-4">
+                  <label class="label is-small" for="ta_body">コミット本文 (Body - optional)</label>
+                  <div class="control">
+                    <textarea
+                      id="ta_body"
+                      class="textarea is-small"
+                      rows="4"
+                      placeholder="変更理由や詳細な動機を記述します。&#10;例: Introduce a request id and a reference to latest request.&#10;Dismiss incoming responses other than from latest request."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <!-- 5. Footer Fields: URL & Ticket -->
+                <div class="columns is-variable is-2 mb-0">
+                  <div class="column is-8">
+                    <div class="field">
+                      <label class="label is-small" for="tx_ref">参考ページ URL (Refs - optional)</label>
+                      <div class="control has-icons-left">
+                        <input id="tx_ref" type="text" class="input is-small" placeholder="https://..." />
+                        <span class="icon is-small is-left">
+                          <i class="fa-solid fa-link"></i>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="column is-4">
+                    <div class="field">
+                      <label class="label is-small" for="tx_ticket">チケット番号 (optional)</label>
+                      <div class="control has-icons-left">
+                        <input id="tx_ticket" type="text" class="input is-small" placeholder="100" />
+                        <span class="icon is-small is-left">
+                          <i class="fa-solid fa-hashtag"></i>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="field">
-                <label class="label has-text-weight-bold has-text-danger" for="tx_breaking">破壊的変更 - BREAKING CHANGE (optional)</label>
-                <div class="control has-icons-left">
-                  <input id="tx_breaking" class="input is-danger" placeholder="`extends` key in config file is now used for extending other config files"></input>
-                  <span class="icon is-small is-left">
-                    <i class="fas fa-tractor"></i>
-                  </span>
-                </div>
-              </div>
-              <div class="field">
-                <label class="label" for="tx_ref">参考ページ URL - Reference URL (optional)</label>
-                <div class="control has-icons-left">
-                  <input id="tx_ref" type="text" class="input" placeholder="https:// ～">
-                  <span class="icon is-small is-left">
-                    <i class="fas fa-book"></i>
-                  </span>
-                </div>
-              </div>
-              <div class="field">
-                <label class="label" for="tx_ticket">チケット番号 - Ticket No. (optional)</label>
-                <div class="control has-icons-left">
-                  <input id="tx_ticket" type="number" class="input" placeholder="100" onchange="buildMessage()">
-                  <span class="icon is-small is-left">
-                    <i class="fas fa-hashtag"></i>
-                  </span>
+            </div>
+          </div>
+
+          <!-- Preview & Action Column (Sticky) -->
+          <div class="column is-5-desktop">
+            <div class="sticky-preview">
+              <div class="card generator-card">
+                <header class="card-header is-shadowless border-bottom px-4 py-3 is-flex is-justify-content-space-between is-align-items-center">
+                  <p class="card-header-title p-0 is-size-6 font-mono">
+                    <i class="fa-solid fa-terminal mr-2 has-text-primary"></i>Message Preview
+                  </p>
+                  <span class="tag is-light is-rounded is-small font-mono" id="lineCountTag">0 行</span>
+                </header>
+                <div class="card-content p-4">
+                  <div class="control mb-3">
+                    <textarea
+                      id="ta_output"
+                      class="textarea preview-textarea"
+                      readonly
+                      placeholder="フォームに入力するとここにメッセージがリアルタイムで組み立てられます..."
+                    ></textarea>
+                  </div>
+                  <div class="buttons is-flex">
+                    <button id="copyBtn" class="button is-primary is-flex-grow-1" onclick="copyToClipboard()">
+                      <span class="icon" id="copyIcon"><i class="fa-regular fa-copy"></i></span>
+                      <span id="copyLabel" class="has-text-weight-bold">コピー</span>
+                    </button>
+                    <button class="button is-light" onclick="clearForm()" title="フォームを初期状態に戻す">
+                      <span class="icon"><i class="fa-solid fa-rotate-left"></i></span>
+                      <span>クリア</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <footer class="footer">
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer py-4 mt-auto">
+      <div class="content has-text-centered is-size-7 has-text-grey">
+        <p class="mb-1">
+          <a href="./index.html"><strong>Masayuki Fukada's Portal</strong></a> &middot; Conventional Commit Message Generator
+        </p>
+        <p>
+          Based on <a href="https://www.conventionalcommits.org/" target="_blank" rel="noopener noreferrer">Conventional Commits 1.0.0</a> &middot; Built with Bulma 1.0
+        </p>
+      </div>
     </footer>
+
+    <!-- Logic Script -->
     <script>
       const rbTypes = document.getElementsByName('rb_type');
       const txScope = document.getElementById('tx_scope');
       const txTitle = document.getElementById('tx_title');
       const cbBreaking = document.getElementById('cb_breaking');
+      const breakingBox = document.getElementById('breakingBox');
       const txBreaking = document.getElementById('tx_breaking');
       const taBody = document.getElementById('ta_body');
       const txRef = document.getElementById('tx_ref');
       const txTicket = document.getElementById('tx_ticket');
       const taOutput = document.getElementById('ta_output');
+      const titleCounter = document.getElementById('titleCounter');
+      const lineCountTag = document.getElementById('lineCountTag');
+      const copyBtn = document.getElementById('copyBtn');
+      const copyIcon = document.getElementById('copyIcon');
+      const copyLabel = document.getElementById('copyLabel');
 
-      // 読み込み完了時
-      window.addEventListener("load", (event) => {
-        txScope.addEventListener('keyup', () => {buildMessage();});
-        txTitle.addEventListener('keyup', () => {buildMessage();});
-        txBreaking.addEventListener('keyup', () => {buildMessage();});
-        taBody.addEventListener('keyup', () => {buildMessage();});
-        txRef.addEventListener('keyup', () => {buildMessage();});
-        txTicket.addEventListener('keyup', () => {buildMessage();});
+      // イベントリスナー設定
+      window.addEventListener('DOMContentLoaded', () => {
+        const inputElements = [txScope, txTitle, txBreaking, taBody, txRef, txTicket];
+        inputElements.forEach((el) => {
+          if (el) {
+            el.addEventListener('input', () => {
+              buildMessage();
+            });
+          }
+        });
+
+        initTheme();
+        buildMessage();
       });
 
-      // メッセージの組み立て
+      function onBreakingToggle() {
+        if (cbBreaking.checked) {
+          breakingBox.classList.remove('is-hidden');
+        } else {
+          breakingBox.classList.add('is-hidden');
+        }
+        buildMessage();
+      }
+
+      // メッセージ組み立て
       function buildMessage() {
-        let hasBody = (taBody.value.length > 0);
-        let hasReference =  (cbBreaking.checked && txBreaking.value.length) ||
-                            (txRef.value.length > 0) ||
-                            (txTicket.value.length > 0);
+        let typeVal = 'feat';
+        rbTypes.forEach((item) => {
+          if (item.checked) {
+            typeVal = item.value;
+          }
+        });
 
-        let message = "";
-        rbTypes.forEach(item => {if(item.checked){ message = item.value }});
-
-        if(txScope.value.length > 0) {
-          message += "(" + txScope.value + ")";
+        // タイトル文字数カウンター更新
+        const titleLen = txTitle.value.length;
+        titleCounter.textContent = `${titleLen} / 50`;
+        if (titleLen > 50) {
+          titleCounter.classList.add('has-text-danger', 'has-text-weight-bold');
+          titleCounter.classList.remove('has-text-grey');
+        } else {
+          titleCounter.classList.remove('has-text-danger', 'has-text-weight-bold');
+          titleCounter.classList.add('has-text-grey');
         }
-        if(cbBreaking.checked) { message += "!" }
-        message += ": " + txTitle.value;
 
-        if(hasBody){
-          message += "\n";
-          if(taBody.value.length > 0) { message += "\n" + taBody.value; }
+        let message = '';
+        message += typeVal;
+
+        if (txScope.value.trim().length > 0) {
+          message += `(${txScope.value.trim()})`;
         }
 
-        if(hasReference) {
-          message += "\n";
-          if(cbBreaking.checked && txBreaking.value.length > 0) { message += "\nBREAKING CHANGE: " + txBreaking.value; }
-          if(txRef.value.length > 0) { message += "\nRefs: " + txRef.value; }
-          if(txTicket.value.length > 0) { message += "\n#" + txTicket.value; }
+        if (cbBreaking.checked) {
+          message += '!';
+        }
+
+        message += ': ' + txTitle.value;
+
+        // 本文 (Body)
+        if (taBody.value.trim().length > 0) {
+          message += '\n\n' + taBody.value.trim();
+        }
+
+        // フッター参照 (Breaking, Refs, Ticket)
+        const hasBreakingText = cbBreaking.checked && txBreaking.value.trim().length > 0;
+        const hasRef = txRef.value.trim().length > 0;
+        const hasTicket = txTicket.value.trim().length > 0;
+
+        if (hasBreakingText || hasRef || hasTicket) {
+          message += '\n';
+          if (hasBreakingText) {
+            message += '\nBREAKING CHANGE: ' + txBreaking.value.trim();
+          }
+          if (hasRef) {
+            message += '\nRefs: ' + txRef.value.trim();
+          }
+          if (hasTicket) {
+            const ticketVal = txTicket.value.trim().replace(/^#/, '');
+            message += '\n#' + ticketVal;
+          }
         }
 
         taOutput.value = message;
+
+        // 行数カウント更新
+        const lines = message.length > 0 ? message.split('\n').length : 0;
+        lineCountTag.textContent = `${lines} 行`;
       }
 
-      function copyToClipboard() {
-        var sourceText = document.getElementById("ta_output");
-        sourceText.select();
-        sourceText.setSelectionRange(0, 99999); // For mobile devices
-        navigator.clipboard.writeText(sourceText.value);
+      // クリップボードへコピー
+      async function copyToClipboard() {
+        if (!taOutput.value.trim()) {
+          Toastify({
+            text: 'コピーするメッセージが空です',
+            duration: 2000,
+            gravity: 'bottom',
+            position: 'right',
+            style: {
+              background: 'linear-gradient(to right, #e74c3c, #c0392b)',
+            },
+          }).showToast();
+          return;
+        }
 
-        // thanks! : https://github.com/apvarun/toastify-js
+        try {
+          await navigator.clipboard.writeText(taOutput.value);
+          copySuccessFeedback();
+        } catch (err) {
+          // フォールバック
+          taOutput.select();
+          document.execCommand('copy');
+          copySuccessFeedback();
+        }
+      }
+
+      function copySuccessFeedback() {
+        copyIcon.innerHTML = '<i class="fa-solid fa-check"></i>';
+        copyLabel.textContent = 'コピー完了!';
+        copyBtn.classList.remove('is-primary');
+        copyBtn.classList.add('is-success');
+
         Toastify({
-          text: "Copied the text",
-          duration: 2000,
-          // destination: "https://github.com/apvarun/toastify-js",
-          newWindow: true,
-          close: true,
-          gravity: "bottom", // `top` or `bottom`
-          position: "left", // `left`, `center` or `right`
-          stopOnFocus: true, // Prevents dismissing of toast on hover
+          text: 'コミットメッセージをコピーしました！',
+          duration: 2500,
+          gravity: 'bottom',
+          position: 'right',
           style: {
-            background: "linear-gradient(to right, #00b09b, #96c93d)",
+            background: 'linear-gradient(to right, #00b09b, #96c93d)',
+            borderRadius: '8px',
+            fontFamily: 'var(--font-sans)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
           },
-          onClick: function(){} // Callback after click
+        }).showToast();
+
+        setTimeout(() => {
+          copyIcon.innerHTML = '<i class="fa-regular fa-copy"></i>';
+          copyLabel.textContent = 'コピー';
+          copyBtn.classList.remove('is-success');
+          copyBtn.classList.add('is-primary');
+        }, 2000);
+      }
+
+      // フォームクリア
+      function clearForm() {
+        rbTypes[0].checked = true;
+        txScope.value = '';
+        txTitle.value = '';
+        cbBreaking.checked = false;
+        breakingBox.classList.add('is-hidden');
+        txBreaking.value = '';
+        taBody.value = '';
+        txRef.value = '';
+        txTicket.value = '';
+        buildMessage();
+
+        Toastify({
+          text: 'フォームをクリアしました',
+          duration: 1500,
+          gravity: 'bottom',
+          position: 'right',
+          style: {
+            background: '#718096',
+            borderRadius: '8px',
+          },
         }).showToast();
       }
 
-      function clearForm() {
-        rbTypes[0].checked = true;
-        txScope.value = "";
-        txTitle.value = "";
-        cbBreaking.checked = false;
-        txBreaking.value = "";
-        taBody.value = "";
-        txRef.value = "";
-        txTicket.value = "";
-        taOutput.value = "";
+      // ダーク / ライトテーマ管理
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = document.getElementById('themeIcon');
+      const htmlEl = document.documentElement;
+
+      function initTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || savedTheme === 'light') {
+          setTheme(savedTheme, false);
+        } else {
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          setTheme(prefersDark ? 'dark' : 'light', false);
+        }
       }
+
+      function setTheme(theme, save = true) {
+        htmlEl.setAttribute('data-theme', theme);
+        if (theme === 'dark') {
+          themeIcon.className = 'fa-solid fa-sun';
+          themeToggle.setAttribute('title', 'ライトモードへ切替');
+        } else {
+          themeIcon.className = 'fa-solid fa-moon';
+          themeToggle.setAttribute('title', 'ダークモードへ切替');
+        }
+        if (save) {
+          localStorage.setItem('theme', theme);
+        }
+      }
+
+      if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+          const currentTheme = htmlEl.getAttribute('data-theme');
+          const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          setTheme(nextTheme);
+        });
+      }
+
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+          setTheme(e.matches ? 'dark' : 'light', false);
+        }
+      });
     </script>
   </body>
 </html>
