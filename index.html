@@ -1,205 +1,695 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja" data-theme="system">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Masayuki Fukada GitHub page</title>
+    <title>Masayuki Fukada's Portal</title>
+    <meta
+      name="description"
+      content="Masayuki FukadaのGitHubポータルサイト。自作PWAアプリ、開発支援ツール、設計思想・技術メモをまとめています。"
+    />
+    <!-- Bulma 1.0.1 -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.1/css/bulma.min.css"
     />
+    <!-- Font Awesome 6 -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --font-sans: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+      }
+      body {
+        font-family: var(--font-sans);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      main {
+        flex: 1;
+      }
+      .font-mono {
+        font-family: var(--font-mono);
+      }
+      .portal-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .portal-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+      }
+      .portal-card .card-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .portal-card .card-footer {
+        margin-top: auto;
+        border-top: 1px solid var(--bulma-border-weak, rgba(0, 0, 0, 0.05));
+      }
+      .pgp-box {
+        background: var(--bulma-scheme-main-bis);
+        border: 1px solid var(--bulma-border-weak);
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+      }
+      .virtue-card {
+        border-left: 4px solid var(--bulma-primary);
+        border-radius: 8px;
+        background: var(--bulma-scheme-main-bis);
+        padding: 1rem 1.25rem;
+        height: 100%;
+      }
+      .theme-toggle-btn {
+        border-radius: 9999px;
+      }
+      .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--bulma-border-weak);
+      }
+      .section-heading i {
+        color: var(--bulma-primary);
+      }
+    </style>
   </head>
   <body>
-    <h1>Masayuki Fukada's GitHub Page</h1>
-    <div class="content">
-      <ul>
-        <li>
-          <a href="https://t.co/BKblDk51vk">PGP 公開鍵</a>
-        </li>
-        <ul>
-          <li>
-            Finger Print: 4A7D 8229 FE90 F880 C63E A031 DC80 74A6 1185 1669
-          </li>
-        </ul>
-      </ul>
-      <ul>
-        <li>
-          Words
-          <ul>
-            <li>
-              プログラマの三大美徳は「<label
-                class="has-text-success has-text-weight-bold"
-                >怠惰（Laziness）</label
-              >」「<label class="has-text-success has-text-weight-bold"
-                >短気（Impatience）</label
-              >」「<label class="has-text-success has-text-weight-bold"
-                >傲慢（Hubris）</label
-              >」である
-              <ul>
-                <li>怠惰：「労力の必要な作業を簡単にできるようにすること」</li>
-                <li>
-                  短気：「作業を短時間で済ませること、もしくは既に済ませていること」
-                </li>
-                <li>
-                  傲慢：「正しく動作させられる(考慮漏れがない)自信を持っていること」
-                </li>
-              </ul>
-            </li>
-            <li>
-              プログラミングとは<label
-                class="has-text-success has-text-weight-bold"
-                >理解・分解・再構築</label
-              >である
-            </li>
-          </ul>
-        </li>
-        <li>
-          Tools
-          <ul>
-            <li>
-              <a href="./commit_message.html">Conventionalコミットメッセージの生成</a>
-            </li>
-            <li>
-              <a href="./manage_prompt.html">生成 AI 用プロンプトマネージャ</a>
-            </li>
-            <li>
-              <a href="https://masayukifukada.github.io/Flowra/">Flowra (設計書作成補助ツール)</a>
-            </li>
-            <li>
-              <a href="./lizard_viewer.html">Lizard CSV ビューア</a>
-            </li>
-            <li>
-              PlantUMLのテンプレート
-              <ul>
-                <li><a href="gantto_template.pu">ガントチャート</a></li>
-                <li>クラス図</li>
-                <li>ER図</li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-        <li>
-          Project Memos
-          <ul>
-            <li>
-              <a href="./project_memo_warnings.html">
-                ワーニングをエラーとして扱う
+    <!-- Navigation Bar -->
+    <nav class="navbar is-transparent py-2" role="navigation" aria-label="main navigation">
+      <div class="container">
+        <div class="navbar-brand">
+          <a class="navbar-item has-text-weight-bold is-size-5" href="./index.html">
+            <span class="icon-text">
+              <span class="icon has-text-primary"><i class="fa-solid fa-cube"></i></span>
+              <span>Masayuki Fukada</span>
+            </span>
+          </a>
+        </div>
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <div class="buttons">
+              <button id="themeToggle" class="button is-ghost theme-toggle-btn" aria-label="テーマ切替">
+                <span class="icon"><i id="themeIcon" class="fa-solid fa-moon"></i></span>
+              </button>
+              <a
+                href="https://github.com/MasayukiFukada"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="button is-dark is-outlined is-rounded"
+              >
+                <span class="icon"><i class="fa-brands fa-github"></i></span>
+                <span>GitHub</span>
               </a>
-            </li>
-            <li>
-              <a href="./project_memo_coverage.html">
-                カバレッジとパレートの法則
-              </a>
-            </li>
-          </ul>
-        </li>
-        <li>
-          PWA アプリ
-          <ul>
-            <li>
-              スマートフォンにそのままインストールすることのできるPWA( Progressive Web Apps )です
-            </li>
-            <li>
-              アプリはそれぞれ Manifest が異なりますので、確認して使用してください。
-            </li>
-            <ol>
-              <li>
-                  <a href="https://masayukifukada.github.io/pwa_bofmemo/">
-                    チラシの裏メモ
-                  </a>
-                  <ul>
-                    <li>
-                      走り書き程度の簡易メモアプリ
-                    </li>
-                    <li>
-                      メモを登録した時の場所も記録するので、<strong>&lt;&lt; GPS情報を利用 &gt;&gt;</strong>します。
-                    </li>
-                    <li>
-                      メモはブラウザ内のDBに保存します。登録したメモやGPS情報などは外部への保存を行いません。
-                    </li>
-                    <li>
-                      [ExpenditureBook](https://github.com/MasayukiFukada/ExpenditureBook)と連携させることも可能です。
-                    </li>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <!-- Hero Section -->
+      <section class="hero is-small">
+        <div class="hero-body">
+          <div class="container">
+            <div class="columns is-vcentered">
+              <div class="column is-7">
+                <h1 class="title is-2 has-text-weight-bold mb-3">
+                  Masayuki Fukada's Portal
+                </h1>
+                <p class="subtitle is-5 has-text-grey mb-0">
+                  プログラミングとは <strong class="has-text-primary">理解・分解・再構築</strong> である
+                </p>
+              </div>
+
+              <!-- PGP Key Card -->
+              <div class="column is-5">
+                <div class="pgp-box">
+                  <div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
+                    <span class="has-text-weight-semibold is-size-6">
+                      <i class="fa-solid fa-key mr-1 has-text-warning-dark"></i> PGP 公開鍵
+                    </span>
+                    <a
+                      href="https://t.co/BKblDk51vk"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="button is-small is-link is-light is-rounded"
+                    >
+                      <span class="icon is-small"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                      <span>公開鍵取得</span>
+                    </a>
+                  </div>
+                  <p class="is-size-7 has-text-grey mb-1">Fingerprint</p>
+                  <div class="field has-addons mb-0">
+                    <div class="control is-expanded">
+                      <input
+                        id="pgpFingerprint"
+                        class="input is-small font-mono"
+                        type="text"
+                        readonly
+                        value="4A7D 8229 FE90 F880 C63E A031 DC80 74A6 1185 1669"
+                      />
+                    </div>
+                    <div class="control">
+                      <button id="copyPgpBtn" class="button is-small is-primary" title="Fingerprintをコピー">
+                        <span class="icon is-small" id="copyIcon"><i class="fa-regular fa-copy"></i></span>
+                        <span id="copyText">コピー</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Content Container -->
+      <div class="container px-4 py-5">
+        <!-- Philosophies / Words Section -->
+        <section class="mb-6">
+          <div class="section-heading">
+            <span class="icon is-medium"><i class="fa-solid fa-quote-left fa-lg"></i></span>
+            <h2 class="title is-4 mb-0">Words</h2>
+          </div>
+          <p class="subtitle is-6 has-text-grey mb-4">プログラマの三大美徳（Three Virtues of a Programmer）</p>
+          <div class="columns is-multiline">
+            <div class="column is-4">
+              <div class="virtue-card">
+                <h3 class="title is-5 mb-2 has-text-primary">
+                  <i class="fa-solid fa-bed mr-2"></i>怠惰 <span class="is-size-6 font-mono">(Laziness)</span>
+                </h3>
+                <p class="is-size-6">
+                  労力の必要な作業を簡単にできるようにすること。全体的なエネルギー消費を減らすための努力。
+                </p>
+              </div>
+            </div>
+            <div class="column is-4">
+              <div class="virtue-card" style="border-left-color: var(--bulma-info);">
+                <h3 class="title is-5 mb-2 has-text-info">
+                  <i class="fa-solid fa-stopwatch-20 mr-2"></i>短気 <span class="is-size-6 font-mono">(Impatience)</span>
+                </h3>
+                <p class="is-size-6">
+                  作業を短時間で済ませること、もしくは既に済ませていること。コンピュータの遅さに我慢できない怒り。
+                </p>
+              </div>
+            </div>
+            <div class="column is-4">
+              <div class="virtue-card" style="border-left-color: var(--bulma-success);">
+                <h3 class="title is-5 mb-2 has-text-success">
+                  <i class="fa-solid fa-shield-halved mr-2"></i>傲慢 <span class="is-size-6 font-mono">(Hubris)</span>
+                </h3>
+                <p class="is-size-6">
+                  正しく動作させられる（考慮漏れがない）自信を持っていること。他人に誇れるプログラムを書く自尊心。
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Featured PWA Apps Section -->
+        <section class="mb-6">
+          <div class="section-heading">
+            <span class="icon is-medium"><i class="fa-solid fa-mobile-screen-button fa-lg"></i></span>
+            <h2 class="title is-4 mb-0">PWA アプリ</h2>
+          </div>
+          <p class="subtitle is-6 has-text-grey mb-4">
+            スマートフォンやデスクトップにインストールしてオフラインでも利用できる Progressive Web Apps です。
+          </p>
+
+          <div class="columns is-multiline">
+            <!-- 図解スクショ工房 -->
+            <div class="column is-4">
+              <div class="card portal-card">
+                <div class="card-content">
+                  <div class="is-flex is-align-items-center mb-3">
+                    <span class="icon is-large has-text-danger mr-2">
+                      <i class="fa-solid fa-wand-magic-sparkles fa-2x"></i>
+                    </span>
+                    <div>
+                      <h3 class="title is-5 mb-1">図解スクショ工房</h3>
+                      <div class="tags are-small mb-0">
+                        <span class="tag is-danger is-light">PWA</span>
+                        <span class="tag is-light">画像加工</span>
+                        <span class="tag is-light">注釈</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="is-size-6 mb-3">
+                    Wikiやマニュアル作成用のスクリーンショット画像加工・注釈付けアプリ。
+                  </p>
+                  <ul class="is-size-7 has-text-grey mb-3" style="list-style-type: disc; padding-left: 1.25rem;">
+                    <li>クリップボードからの直接貼り付け、図形・矢印・テキスト描画</li>
+                    <li>注目箇所を拡大する引き出しルーペ、動的連番バッジ</li>
+                    <li>モザイク・マスキング処理対応</li>
+                    <li>加工した画像はワンクリックでクリップボードへコピー可能</li>
                   </ul>
-              </li>
-              <li>
-                  <a href="https://masayukifukada.github.io/pwa_fuellv/">
-                    ガソリンのセルフ給油目安
-                  </a>
-                  <ul>
-                    <li>
-                      セルフ給油の操作目安を表示するアプリ
-                    </li>
-                    <li>
-                      1000円単位で目標の給油量を計算します
-                    </li>
-                    <li>
-                      計算だけなのでDBや特殊な権限を必要としません
-                    </li>
-                  </ul>
-              </li>
-              <li>
-                  <a href="https://masayukifukada.github.io/pwa_shotstudio/">
-                    図解スクショ工房
-                  </a>
-                  <ul>
-                    <li>
-                      Wikiやマニュアル作成用のスクリーンショット画像加工・注釈付けアプリ
-                    </li>
-                    <li>
-                      クリップボードからの直接貼り付け、四角・丸・矢印・テキスト描画
-                    </li>
-                    <li>
-                      注目箇所を拡大する引き出しルーペ、動的連番バッジ、モザイク・マスキング
-                    </li>
-                    <li>
-                      加工した画像はワンクリックでクリップボードにコピー可能
-                    </li>
-                  </ul>
-              </li>
-            </ol>
-          </ul>
-        </li>
-        <li>
-          Programming Memos
-          <ol>
-            <li>定数よりも列挙型(定数のグループ化。例：曜日)</li>
-            <li>
-              SOLID 原則( 外部リンク )
-              <ul>
-                <li>要約：抽象に依存させる</li>
-                <li>
+                </div>
+                <footer class="card-footer">
                   <a
-                    href="https://medium.com/backticks-tildes/the-s-o-l-i-d-principles-in-pictures-b34ce2f1e898"
-                    >The S.O.L.I.D Principles in Pictures</a
+                    href="https://masayukifukada.github.io/pwa_shotstudio/"
+                    class="card-footer-item has-text-weight-semibold has-text-danger"
                   >
-                </li>
-              </ul>
-            </li>
-            <li>
-              デザインパターン( 外部リンク )
-              <ul>
-                <li>
-                  <a href="https://www.techscore.com/tech/DesignPattern/"
-                    >TECHSCORE</a
+                    <span>アプリを開く</span>
+                    <span class="icon is-small ml-1"><i class="fa-solid fa-arrow-right"></i></span>
+                  </a>
+                </footer>
+              </div>
+            </div>
+
+            <!-- チラシの裏メモ -->
+            <div class="column is-4">
+              <div class="card portal-card">
+                <div class="card-content">
+                  <div class="is-flex is-align-items-center mb-3">
+                    <span class="icon is-large has-text-info mr-2">
+                      <i class="fa-solid fa-note-sticky fa-2x"></i>
+                    </span>
+                    <div>
+                      <h3 class="title is-5 mb-1">チラシの裏メモ</h3>
+                      <div class="tags are-small mb-0">
+                        <span class="tag is-info is-light">PWA</span>
+                        <span class="tag is-warning is-light"><i class="fa-solid fa-location-dot mr-1"></i>GPS</span>
+                        <span class="tag is-light">IndexedDB</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="is-size-6 mb-3">
+                    思いついたことを走り書きできる位置情報付き簡易メモアプリ。
+                  </p>
+                  <ul class="is-size-7 has-text-grey mb-3" style="list-style-type: disc; padding-left: 1.25rem;">
+                    <li>メモ登録時の場所も記録（GPS情報を活用）</li>
+                    <li>ブラウザ内ローカルDB（IndexedDB）保存で完全プライベート</li>
+                    <li>
+                      <a href="https://github.com/MasayukiFukada/ExpenditureBook" target="_blank" rel="noopener noreferrer">
+                        ExpenditureBook
+                      </a>
+                      とのデータ連携に対応
+                    </li>
+                  </ul>
+                </div>
+                <footer class="card-footer">
+                  <a
+                    href="https://masayukifukada.github.io/pwa_bofmemo/"
+                    class="card-footer-item has-text-weight-semibold has-text-info"
                   >
-                </li>
-                <li>
-                  <a href="https://refactoring.guru/ja">Refactoring.Guru</a>
-                </li>
-              </ul>
-            </li>
-            <<li>
-              アジャイル関連
-              <<ul>
-                <<li>
-                  <<a href="chrome-extension://gfbliohnnapiefjpjlpjnehglfpaknnc/pages/pdf_viewer.html?file=https://scrumguides.org/docs/scrumguide/v2020/2020-Scrum-Guide-Japanese.pdf">スクラムガイド</a>
-                </li>
-              </ul>
-            </li>
-          </ol>
-        </li>
-      </ul>
-    </div>
+                    <span>アプリを開く</span>
+                    <span class="icon is-small ml-1"><i class="fa-solid fa-arrow-right"></i></span>
+                  </a>
+                </footer>
+              </div>
+            </div>
+
+            <!-- ガソリンのセルフ給油目安 -->
+            <div class="column is-4">
+              <div class="card portal-card">
+                <div class="card-content">
+                  <div class="is-flex is-align-items-center mb-3">
+                    <span class="icon is-large has-text-success mr-2">
+                      <i class="fa-solid fa-gas-pump fa-2x"></i>
+                    </span>
+                    <div>
+                      <h3 class="title is-5 mb-1">ガソリンのセルフ給油目安</h3>
+                      <div class="tags are-small mb-0">
+                        <span class="tag is-success is-light">PWA</span>
+                        <span class="tag is-light">計算ツール</span>
+                        <span class="tag is-light">権限不要</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="is-size-6 mb-3">
+                    セルフ給油での操作目安を素早く計算・表示するユーティリティ。
+                  </p>
+                  <ul class="is-size-7 has-text-grey mb-3" style="list-style-type: disc; padding-left: 1.25rem;">
+                    <li>1,000円単位で目標の給油量を自動計算</li>
+                    <li>純粋な計算ロジックのみでDBや特別な権限は不要</li>
+                    <li>給油機の前でもサッと確認できる軽量設計</li>
+                  </ul>
+                </div>
+                <footer class="card-footer">
+                  <a
+                    href="https://masayukifukada.github.io/pwa_fuellv/"
+                    class="card-footer-item has-text-weight-semibold has-text-success"
+                  >
+                    <span>アプリを開く</span>
+                    <span class="icon is-small ml-1"><i class="fa-solid fa-arrow-right"></i></span>
+                  </a>
+                </footer>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Web Tools Section -->
+        <section class="mb-6">
+          <div class="section-heading">
+            <span class="icon is-medium"><i class="fa-solid fa-screwdriver-wrench fa-lg"></i></span>
+            <h2 class="title is-4 mb-0">Tools</h2>
+          </div>
+          <p class="subtitle is-6 has-text-grey mb-4">
+            日々の開発やドキュメンテーションを快適にする Web ツール群です。
+          </p>
+
+          <div class="columns is-multiline">
+            <!-- Conventionalコミットメッセージの生成 -->
+            <div class="column is-4">
+              <div class="card portal-card">
+                <div class="card-content">
+                  <div class="is-flex is-align-items-center mb-2">
+                    <span class="icon has-text-primary mr-2"><i class="fa-solid fa-code-commit"></i></span>
+                    <h3 class="title is-6 mb-0">Conventional コミットメッセージ生成</h3>
+                  </div>
+                  <p class="is-size-7 has-text-grey mb-2">
+                    Conventional Commits 形式に従った標準的で読みやすいコミットメッセージを素早く作成。
+                  </p>
+                </div>
+                <footer class="card-footer">
+                  <a href="./commit_message.html" class="card-footer-item has-text-weight-semibold is-size-7">
+                    <span>ツールを開く</span>
+                    <span class="icon is-small ml-1"><i class="fa-solid fa-arrow-right"></i></span>
+                  </a>
+                </footer>
+              </div>
+            </div>
+
+            <!-- 生成 AI 用プロンプトマネージャ -->
+            <div class="column is-4">
+              <div class="card portal-card">
+                <div class="card-content">
+                  <div class="is-flex is-align-items-center mb-2">
+                    <span class="icon has-text-info mr-2"><i class="fa-solid fa-terminal"></i></span>
+                    <h3 class="title is-6 mb-0">生成 AI 用プロンプトマネージャ</h3>
+                  </div>
+                  <p class="is-size-7 has-text-grey mb-2">
+                    生成 AI に与えるシステムプロンプトや指示文を整理・管理・コピーする支援ツール。
+                  </p>
+                </div>
+                <footer class="card-footer">
+                  <a href="./manage_prompt.html" class="card-footer-item has-text-weight-semibold is-size-7">
+                    <span>ツールを開く</span>
+                    <span class="icon is-small ml-1"><i class="fa-solid fa-arrow-right"></i></span>
+                  </a>
+                </footer>
+              </div>
+            </div>
+
+            <!-- Flowra -->
+            <div class="column is-4">
+              <div class="card portal-card">
+                <div class="card-content">
+                  <div class="is-flex is-align-items-center mb-2">
+                    <span class="icon has-text-link mr-2"><i class="fa-solid fa-diagram-project"></i></span>
+                    <h3 class="title is-6 mb-0">Flowra</h3>
+                  </div>
+                  <p class="is-size-7 has-text-grey mb-2">
+                    直感的な操作でシステム設計書やフローの作成を補助するWebツール。
+                  </p>
+                </div>
+                <footer class="card-footer">
+                  <a
+                    href="https://masayukifukada.github.io/Flowra/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="card-footer-item has-text-weight-semibold is-size-7"
+                  >
+                    <span>Flowra を開く</span>
+                    <span class="icon is-small ml-1"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                  </a>
+                </footer>
+              </div>
+            </div>
+
+            <!-- Lizard CSV ビューア -->
+            <div class="column is-4">
+              <div class="card portal-card">
+                <div class="card-content">
+                  <div class="is-flex is-align-items-center mb-2">
+                    <span class="icon has-text-success mr-2"><i class="fa-solid fa-table-list"></i></span>
+                    <h3 class="title is-6 mb-0">Lizard CSV ビューア</h3>
+                  </div>
+                  <p class="is-size-7 has-text-grey mb-2">
+                    循環的複雑度（Cyclomatic Complexity）計測ツール Lizard の出力 CSV を見やすく可視化。
+                  </p>
+                </div>
+                <footer class="card-footer">
+                  <a href="./lizard_viewer.html" class="card-footer-item has-text-weight-semibold is-size-7">
+                    <span>ビューアを開く</span>
+                    <span class="icon is-small ml-1"><i class="fa-solid fa-arrow-right"></i></span>
+                  </a>
+                </footer>
+              </div>
+            </div>
+
+            <!-- PlantUML テンプレート -->
+            <div class="column is-4">
+              <div class="card portal-card">
+                <div class="card-content">
+                  <div class="is-flex is-align-items-center mb-2">
+                    <span class="icon has-text-warning-dark mr-2"><i class="fa-solid fa-cubes-stacked"></i></span>
+                    <h3 class="title is-6 mb-0">PlantUML テンプレート</h3>
+                  </div>
+                  <p class="is-size-7 has-text-grey mb-2">
+                    すぐに使える PlantUML ダイアグラムの構成ひな形集。
+                  </p>
+                  <div class="tags are-small mb-0">
+                    <a href="gantto_template.pu" class="tag is-link is-light" download>
+                      <i class="fa-solid fa-download mr-1"></i>ガントチャート (.pu)
+                    </a>
+                    <span class="tag is-light">クラス図</span>
+                    <span class="tag is-light">ER図</span>
+                  </div>
+                </div>
+                <footer class="card-footer">
+                  <a href="gantto_template.pu" class="card-footer-item has-text-weight-semibold is-size-7">
+                    <span>テンプレートを表示</span>
+                    <span class="icon is-small ml-1"><i class="fa-solid fa-file-code"></i></span>
+                  </a>
+                </footer>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Project Memos & Programming Memos -->
+        <section class="mb-6">
+          <div class="columns is-multiline">
+            <!-- Project Memos -->
+            <div class="column is-6">
+              <div class="section-heading">
+                <span class="icon is-medium"><i class="fa-solid fa-folder-open fa-lg"></i></span>
+                <h2 class="title is-4 mb-0">Project Memos</h2>
+              </div>
+              <div class="card portal-card">
+                <div class="card-content">
+                  <div class="panel is-shadowless mb-0">
+                    <a href="./project_memo_warnings.html" class="panel-block is-flex is-justify-content-space-between py-3">
+                      <span class="icon-text">
+                        <span class="icon has-text-warning"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                        <span class="has-text-weight-medium">ワーニングをエラーとして扱う</span>
+                      </span>
+                      <span class="icon is-small has-text-grey"><i class="fa-solid fa-chevron-right"></i></span>
+                    </a>
+                    <a href="./project_memo_coverage.html" class="panel-block is-flex is-justify-content-space-between py-3">
+                      <span class="icon-text">
+                        <span class="icon has-text-info"><i class="fa-solid fa-chart-pie"></i></span>
+                        <span class="has-text-weight-medium">カバレッジとパレートの法則</span>
+                      </span>
+                      <span class="icon is-small has-text-grey"><i class="fa-solid fa-chevron-right"></i></span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Programming Memos -->
+            <div class="column is-6">
+              <div class="section-heading">
+                <span class="icon is-medium"><i class="fa-solid fa-lightbulb fa-lg"></i></span>
+                <h2 class="title is-4 mb-0">Programming Memos</h2>
+              </div>
+              <div class="card portal-card">
+                <div class="card-content">
+                  <div class="content is-size-6 mb-3">
+                    <p class="mb-2">
+                      <i class="fa-solid fa-check has-text-success mr-2"></i>
+                      <strong>定数よりも列挙型</strong>（定数のグループ化。例：曜日など型の安全性を担保）
+                    </p>
+                  </div>
+
+                  <div class="panel is-shadowless mb-0">
+                    <div class="panel-block py-2 has-text-grey is-size-7 has-text-weight-bold">
+                      設計原則 & パターン (Links)
+                    </div>
+                    <a
+                      href="https://medium.com/backticks-tildes/the-s-o-l-i-d-principles-in-pictures-b34ce2f1e898"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="panel-block is-flex is-justify-content-space-between py-2 is-size-7"
+                    >
+                      <span class="icon-text">
+                        <span class="icon has-text-link"><i class="fa-solid fa-cubes"></i></span>
+                        <span>SOLID 原則：The S.O.L.I.D Principles in Pictures（要約：抽象に依存させる）</span>
+                      </span>
+                      <span class="icon is-small has-text-grey"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                    </a>
+                    <a
+                      href="https://www.techscore.com/tech/DesignPattern/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="panel-block is-flex is-justify-content-space-between py-2 is-size-7"
+                    >
+                      <span class="icon-text">
+                        <span class="icon has-text-info"><i class="fa-solid fa-sitemap"></i></span>
+                        <span>デザインパターン：TECHSCORE</span>
+                      </span>
+                      <span class="icon is-small has-text-grey"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                    </a>
+                    <a
+                      href="https://refactoring.guru/ja"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="panel-block is-flex is-justify-content-space-between py-2 is-size-7"
+                    >
+                      <span class="icon-text">
+                        <span class="icon has-text-warning"><i class="fa-solid fa-arrows-rotate"></i></span>
+                        <span>デザインパターン & リファクタリング：Refactoring.Guru</span>
+                      </span>
+                      <span class="icon is-small has-text-grey"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                    </a>
+                    <a
+                      href="https://scrumguides.org/docs/scrumguide/v2020/2020-Scrum-Guide-Japanese.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="panel-block is-flex is-justify-content-space-between py-2 is-size-7"
+                    >
+                      <span class="icon-text">
+                        <span class="icon has-text-danger"><i class="fa-solid fa-people-group"></i></span>
+                        <span>アジャイル開発：スクラムガイド 2020 (日本語公式PDF)</span>
+                      </span>
+                      <span class="icon is-small has-text-grey"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer py-5 mt-auto">
+      <div class="content has-text-centered is-size-7 has-text-grey">
+        <p class="mb-1">
+          <strong>Masayuki Fukada's Portal</strong> &copy; 2026 Masayuki Fukada
+        </p>
+        <p>
+          Built with <a href="https://bulma.io/" target="_blank" rel="noopener noreferrer">Bulma 1.0</a> &middot; Hosted on GitHub Pages
+        </p>
+      </div>
+    </footer>
+
+    <!-- Interactive Script -->
+    <script>
+      // PGP Fingerprint Copy Feature
+      const copyBtn = document.getElementById('copyPgpBtn');
+      const copyIcon = document.getElementById('copyIcon');
+      const copyText = document.getElementById('copyText');
+      const fingerprintInput = document.getElementById('pgpFingerprint');
+
+      if (copyBtn && fingerprintInput) {
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(fingerprintInput.value);
+            copyIcon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            copyText.textContent = 'コピー完了!';
+            copyBtn.classList.remove('is-primary');
+            copyBtn.classList.add('is-success');
+
+            setTimeout(() => {
+              copyIcon.innerHTML = '<i class="fa-regular fa-copy"></i>';
+              copyText.textContent = 'コピー';
+              copyBtn.classList.remove('is-success');
+              copyBtn.classList.add('is-primary');
+            }, 2000);
+          } catch (err) {
+            console.error('Clipboard copy failed:', err);
+            // フォールバック: inputを選択
+            fingerprintInput.select();
+            document.execCommand('copy');
+            copyText.textContent = 'コピー完了!';
+            setTimeout(() => {
+              copyText.textContent = 'コピー';
+            }, 2000);
+          }
+        });
+      }
+
+      // Dark / Light Theme Toggle
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = document.getElementById('themeIcon');
+      const htmlEl = document.documentElement;
+
+      // 保存されたテーマまたはOS設定を反映
+      function initTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || savedTheme === 'light') {
+          setTheme(savedTheme);
+        } else {
+          // OSのデフォルト判定
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          setTheme(prefersDark ? 'dark' : 'light', false);
+        }
+      }
+
+      function setTheme(theme, save = true) {
+        htmlEl.setAttribute('data-theme', theme);
+        if (theme === 'dark') {
+          themeIcon.className = 'fa-solid fa-sun';
+          themeToggle.setAttribute('title', 'ライトモードへ切替');
+        } else {
+          themeIcon.className = 'fa-solid fa-moon';
+          themeToggle.setAttribute('title', 'ダークモードへ切替');
+        }
+        if (save) {
+          localStorage.setItem('theme', theme);
+        }
+      }
+
+      if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+          const currentTheme = htmlEl.getAttribute('data-theme');
+          const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          setTheme(nextTheme);
+        });
+      }
+
+      // システム設定の変更監視
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+          setTheme(e.matches ? 'dark' : 'light', false);
+        }
+      });
+
+      initTheme();
+    </script>
   </body>
 </html>
