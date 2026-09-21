@@ -10,6 +10,16 @@
     --text-secondary-color: #757575;
     --divider-color: #e0e0e0;
     --danger-color: #f44336;
+
+    /* Category colors */
+    --cat-0-bg: #e8f5e9;
+    --cat-0-accent: #2e7d32;
+    --cat-1-bg: #e3f2fd;
+    --cat-1-accent: #1976d2;
+    --cat-2-bg: #fff3e0;
+    --cat-2-accent: #e65100;
+    --cat-3-bg: #f3e5f5;
+    --cat-3-accent: #7b1fa2;
 }
 
 body {
@@ -235,14 +245,81 @@ main {
     box-shadow:
         0 1px 3px rgba(0, 0, 0, 0.12),
         0 1px 2px rgba(0, 0, 0, 0.24);
-    transition: box-shadow 0.3s ease;
+    transition: box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
     padding: 16px;
+    border-left: 6px solid var(--primary-color);
 }
 
 .memo-item:hover {
     box-shadow:
         0 3px 6px rgba(0, 0, 0, 0.16),
         0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+/* Category 0: 金額 (payments) */
+.memo-item.category-0 {
+    background-color: var(--cat-0-bg);
+    border-left-color: var(--cat-0-accent);
+}
+.memo-item.category-0 .category-icon {
+    color: var(--cat-0-accent);
+}
+.memo-item.category-0 input[type="checkbox"] {
+    accent-color: var(--cat-0-accent);
+}
+.memo-item.category-0 .memo-amount-display {
+    color: var(--cat-0-accent);
+}
+.memo-item.category-0 .adjust-btn {
+    background: #ffffff;
+    border-color: #c8e6c9;
+    color: var(--cat-0-accent);
+}
+.memo-item.category-0 .adjust-btn:hover {
+    background-color: var(--cat-0-accent);
+    color: #ffffff;
+    border-color: var(--cat-0-accent);
+}
+
+/* Category 1: 数値 (numbers) */
+.memo-item.category-1 {
+    background-color: var(--cat-1-bg);
+    border-left-color: var(--cat-1-accent);
+}
+.memo-item.category-1 .category-icon {
+    color: var(--cat-1-accent);
+}
+.memo-item.category-1 input[type="checkbox"] {
+    accent-color: var(--cat-1-accent);
+}
+
+/* Category 2: 電話 (phone) */
+.memo-item.category-2 {
+    background-color: var(--cat-2-bg);
+    border-left-color: var(--cat-2-accent);
+}
+.memo-item.category-2 .category-icon {
+    color: var(--cat-2-accent);
+}
+.memo-item.category-2 input[type="checkbox"] {
+    accent-color: var(--cat-2-accent);
+}
+
+/* Category 3: その他 (category) */
+.memo-item.category-3 {
+    background-color: var(--cat-3-bg);
+    border-left-color: var(--cat-3-accent);
+}
+.memo-item.category-3 .category-icon {
+    color: var(--cat-3-accent);
+}
+.memo-item.category-3 input[type="checkbox"] {
+    accent-color: var(--cat-3-accent);
+}
+
+.memo-item.selected-for-delete {
+    opacity: 0.6;
+    filter: grayscale(40%);
 }
 
 .memo-item input[type="checkbox"] {
@@ -420,11 +497,29 @@ main {
 }
 
 .category-radio-group input[type="radio"]:checked + .category-label {
-    background-color: var(--primary-color);
     color: white;
-    border-color: var(--primary-color);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
+}
+
+#category-0:checked + .category-label {
+    background-color: var(--cat-0-accent);
+    border-color: var(--cat-0-accent);
+}
+
+#category-1:checked + .category-label {
+    background-color: var(--cat-1-accent);
+    border-color: var(--cat-1-accent);
+}
+
+#category-2:checked + .category-label {
+    background-color: var(--cat-2-accent);
+    border-color: var(--cat-2-accent);
+}
+
+#category-3:checked + .category-label {
+    background-color: var(--cat-3-accent);
+    border-color: var(--cat-3-accent);
 }
 
 /* Header actions */

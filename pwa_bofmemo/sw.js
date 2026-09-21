@@ -1,5 +1,5 @@
-// Build: 2026-08-22 00:15:00
-const CACHE_NAME = "back-of-flyer-memo-pwa-cache-20260822001500";
+// Build: 2026-09-21 14:46:00
+const CACHE_NAME = "back-of-flyer-memo-pwa-cache-20260921144600";
 
 const urlsToCache = [
 

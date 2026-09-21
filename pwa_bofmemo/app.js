@@ -115,6 +115,10 @@ async function renderMemoList() {
   memos.forEach((memo) => {
     const listItem = document.createElement("li");
     listItem.classList.add("memo-item");
+    const categoryIndex = Number.isInteger(memo.category)
+      ? memo.category
+      : parseInt(memo.category, 10) || 0;
+    listItem.classList.add(`category-${categoryIndex}`);
     if (selectedMemoIds.has(memo.id)) {
       listItem.classList.add("selected-for-delete");
     }
@@ -351,9 +355,12 @@ memoCategoryRadioGroup.addEventListener("change", (event) => {
 });
 
 exportButton.addEventListener("click", async () => {
-  const memos = await getMemos();
+  const allMemos = await getMemos();
+  const memos = allMemos.filter(
+    (memo) => Number(memo.category ?? 0) === 0
+  );
   if (memos.length === 0) {
-    alert("エクスポートするメモがありまへん。");
+    alert("エクスポート対象（金額）のメモがありまへん。");
     return;
   }
 
@@ -411,9 +418,12 @@ function setServerUrl(url) {
 
 // Direct send to ExpenditureBook
 sendButton.addEventListener("click", async () => {
-  const memos = await getMemos();
+  const allMemos = await getMemos();
+  const memos = allMemos.filter(
+    (memo) => Number(memo.category ?? 0) === 0
+  );
   if (memos.length === 0) {
-    showToast("送信するメモがありません。", "error");
+    showToast("送信対象（金額）のメモがありません。", "error");
     return;
   }
 
