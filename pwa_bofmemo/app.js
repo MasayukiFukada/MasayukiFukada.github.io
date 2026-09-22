@@ -55,6 +55,7 @@ const memoCategoryRadioGroup = document.getElementById("memo-category-radio");
 
 let deleteMode = false;
 let selectedMemoIds = new Set();
+let expandedAdjustMemoIds = new Set();
 let currentEditingMemoId = null;
 let currentGpsLocation = "";
 let qrStream = null;
@@ -77,6 +78,21 @@ function getCategoryIcon(category) {
     default:
       return "category";
   }
+}
+
+function formatShortDate(timestamp) {
+  if (!timestamp) return "";
+  const d = new Date(timestamp);
+  const now = new Date();
+  const m = (d.getMonth() + 1).toString().padStart(2, "0");
+  const day = d.getDate().toString().padStart(2, "0");
+  const h = d.getHours().toString().padStart(2, "0");
+  const min = d.getMinutes().toString().padStart(2, "0");
+  if (d.getFullYear() === now.getFullYear()) {
+    return `${m}/${day} ${h}:${min}`;
+  }
+  const y = d.getFullYear().toString().slice(-2);
+  return `${y}/${m}/${day} ${h}:${min}`;
 }
 
 function updateBodyInputMode(category) {
@@ -125,35 +141,56 @@ async function renderMemoList() {
 
     const amountMatch = memo.body.match(/\d+/);
     const firstAmount = amountMatch ? parseInt(amountMatch[0], 10) : null;
+    const isExpanded = expandedAdjustMemoIds.has(memo.id);
 
     listItem.innerHTML = `
-      <input type="checkbox" data-id="${memo.id}" ${selectedMemoIds.has(memo.id) ? "checked" : ""}>
-      <div class="memo-item-content" data-id="${memo.id}">
-        <span class="material-icons category-icon">${getCategoryIcon(memo.category)}</span>
-        <h3>${memo.title}</h3>
-        <p class="memo-body-preview">${memo.body}</p>
-        <p class="memo-timestamp">${new Date(memo.timestamp).toLocaleString()}</p>
-        ${
-          firstAmount !== null
-            ? `
-        <div class="memo-item-adjust">
-          <div class="memo-amount-row">
-            <span class="memo-amount-display">${firstAmount.toLocaleString()}</span>
+      <div class="memo-item-main">
+        <input type="checkbox" data-id="${memo.id}" ${selectedMemoIds.has(memo.id) ? "checked" : ""}>
+        <div class="memo-item-content" data-id="${memo.id}">
+          <div class="memo-item-header-row">
+            <span class="material-icons category-icon">${getCategoryIcon(memo.category)}</span>
+            <h3 class="memo-title">${memo.title}</h3>
+            <div class="memo-item-header-right">
+              ${
+                firstAmount !== null
+                  ? `
+                <button type="button" class="memo-amount-badge ${isExpanded ? "active" : ""}" data-id="${memo.id}" title="タップで金額を微調整">
+                  <span>¥${firstAmount.toLocaleString()}</span>
+                  <span class="material-icons amount-expand-icon">${isExpanded ? "expand_less" : "expand_more"}</span>
+                </button>
+              `
+                  : ""
+              }
+              ${
+                memo.gps
+                  ? `<button type="button" data-gps="${memo.gps}" class="open-map-button" title="マップを開く"><span class="material-icons">place</span></button>`
+                  : ""
+              }
+            </div>
           </div>
-          <div class="memo-btn-row">
-            <button class="adjust-btn" data-id="${memo.id}" data-delta="-1000">-1,000</button>
-            <button class="adjust-btn" data-id="${memo.id}" data-delta="-100">-100</button>
-            <button class="adjust-btn" data-id="${memo.id}" data-delta="+100">+100</button>
-            <button class="adjust-btn" data-id="${memo.id}" data-delta="+1000">+1,000</button>
+          <div class="memo-item-sub-row">
+            <p class="memo-body-preview">${memo.body || ""}</p>
+            <span class="memo-timestamp">${formatShortDate(memo.timestamp)}</span>
           </div>
         </div>
-        `
-            : ""
-        }
       </div>
-      <div class="memo-item-actions">
-        ${memo.gps ? `<button data-gps="${memo.gps}" class="open-map-button"><span class="material-icons">map</span></button>` : ""}
+      ${
+        firstAmount !== null
+          ? `
+      <div class="memo-item-adjust ${isExpanded ? "expanded" : ""}" id="adjust-panel-${memo.id}">
+        <div class="memo-adjust-inner">
+          <span class="memo-adjust-current">¥${firstAmount.toLocaleString()}</span>
+          <div class="memo-btn-row">
+            <button type="button" class="adjust-btn" data-id="${memo.id}" data-delta="-1000">-1,000</button>
+            <button type="button" class="adjust-btn" data-id="${memo.id}" data-delta="-100">-100</button>
+            <button type="button" class="adjust-btn" data-id="${memo.id}" data-delta="+100">+100</button>
+            <button type="button" class="adjust-btn" data-id="${memo.id}" data-delta="+1000">+1,000</button>
+          </div>
+        </div>
       </div>
+      `
+          : ""
+      }
     `;
     memoListElement.appendChild(listItem);
   });
@@ -162,13 +199,34 @@ async function renderMemoList() {
   document.querySelectorAll(".open-map-button").forEach((button) => {
     button.addEventListener("click", (event) => {
       event.stopPropagation(); // Prevent listItem click event
-      const button = event.target.closest(".open-map-button");
-      const gps = button.dataset.gps;
+      const btn = event.target.closest(".open-map-button");
+      const gps = btn.dataset.gps;
       if (gps) {
         window.open(
           `https://www.google.com/maps/search/?api=1&query=${gps}`,
           "_blank",
         );
+      }
+    });
+  });
+
+  // 金額バッジタップによる微調整アコーディオンのトグル展開
+  document.querySelectorAll(".memo-amount-badge").forEach((badge) => {
+    badge.addEventListener("click", (event) => {
+      event.stopPropagation(); // 編集モーダルが開くのを防止
+      const id = badge.dataset.id;
+      const panel = document.getElementById(`adjust-panel-${id}`);
+      const icon = badge.querySelector(".amount-expand-icon");
+      if (expandedAdjustMemoIds.has(id)) {
+        expandedAdjustMemoIds.delete(id);
+        badge.classList.remove("active");
+        if (panel) panel.classList.remove("expanded");
+        if (icon) icon.textContent = "expand_more";
+      } else {
+        expandedAdjustMemoIds.add(id);
+        badge.classList.add("active");
+        if (panel) panel.classList.add("expanded");
+        if (icon) icon.textContent = "expand_less";
       }
     });
   });
@@ -210,6 +268,10 @@ async function renderMemoList() {
 
   document.querySelectorAll(".memo-item-content").forEach((contentDiv) => {
     contentDiv.addEventListener("click", async (event) => {
+      // 金額バッジやマップボタンのクリック時は編集モーダルを開かない
+      if (event.target.closest(".memo-amount-badge, .open-map-button")) {
+        return;
+      }
       const id = event.target.closest(".memo-item-content").dataset.id;
       currentEditingMemoId = id;
       const memoToEdit = await getMemoById(id);
@@ -280,6 +342,7 @@ actionButton.addEventListener("click", async () => {
     if (confirm(`ほんまに ${selectedMemoIds.size} 件のメモを削除するんか？`)) {
       for (const id of selectedMemoIds) {
         await deleteMemo(id);
+        expandedAdjustMemoIds.delete(id);
       }
       selectedMemoIds.clear();
       renderMemoList();
