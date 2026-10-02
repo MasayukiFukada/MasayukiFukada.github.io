@@ -61,6 +61,17 @@ let currentGpsLocation = "";
 let qrStream = null;
 let qrScanInterval = null;
 
+let openSwipedItem = null;
+let isSwiping = false;
+
+function closeOpenSwipe() {
+  if (openSwipedItem) {
+    openSwipedItem.style.transition = "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)";
+    openSwipedItem.style.transform = "translateX(0px)";
+    openSwipedItem = null;
+  }
+}
+
 const DEFAULT_SERVER_URL = "http://expenditure.local:3000";
 const STORAGE_KEY_SERVER_URL = "expenditure_server_url";
 
@@ -144,53 +155,61 @@ async function renderMemoList() {
     const isExpanded = expandedAdjustMemoIds.has(memo.id);
 
     listItem.innerHTML = `
-      <div class="memo-item-main">
-        <input type="checkbox" data-id="${memo.id}" ${selectedMemoIds.has(memo.id) ? "checked" : ""}>
-        <div class="memo-item-content" data-id="${memo.id}">
-          <div class="memo-item-header-row">
-            <span class="material-icons category-icon">${getCategoryIcon(memo.category)}</span>
-            <h3 class="memo-title">${memo.title}</h3>
-            <div class="memo-item-header-right">
-              ${
-                firstAmount !== null
-                  ? `
-                <button type="button" class="memo-amount-badge ${isExpanded ? "active" : ""}" data-id="${memo.id}" title="タップで金額を微調整">
-                  <span>¥${firstAmount.toLocaleString()}</span>
-                  <span class="material-icons amount-expand-icon">${isExpanded ? "expand_less" : "expand_more"}</span>
-                </button>
-              `
-                  : ""
-              }
-              ${
-                memo.gps
-                  ? `<button type="button" data-gps="${memo.gps}" class="open-map-button" title="マップを開く"><span class="material-icons">place</span></button>`
-                  : ""
-              }
+      <div class="memo-swipe-action-wrapper">
+        <button type="button" class="memo-swipe-delete-btn" data-id="${memo.id}" title="削除">
+          <span class="material-icons">delete</span>
+          <span>削除</span>
+        </button>
+      </div>
+      <div class="memo-item-body">
+        <div class="memo-item-main">
+          <input type="checkbox" data-id="${memo.id}" ${selectedMemoIds.has(memo.id) ? "checked" : ""}>
+          <div class="memo-item-content" data-id="${memo.id}">
+            <div class="memo-item-header-row">
+              <span class="material-icons category-icon">${getCategoryIcon(memo.category)}</span>
+              <h3 class="memo-title">${memo.title}</h3>
+              <div class="memo-item-header-right">
+                ${
+                  firstAmount !== null
+                    ? `
+                  <button type="button" class="memo-amount-badge ${isExpanded ? "active" : ""}" data-id="${memo.id}" title="タップで金額を微調整">
+                    <span>¥${firstAmount.toLocaleString()}</span>
+                    <span class="material-icons amount-expand-icon">${isExpanded ? "expand_less" : "expand_more"}</span>
+                  </button>
+                `
+                    : ""
+                }
+                ${
+                  memo.gps
+                    ? `<button type="button" data-gps="${memo.gps}" class="open-map-button" title="マップを開く"><span class="material-icons">place</span></button>`
+                    : ""
+                }
+              </div>
+            </div>
+            <div class="memo-item-sub-row">
+              <p class="memo-body-preview">${memo.body || ""}</p>
+              <span class="memo-timestamp">${formatShortDate(memo.timestamp)}</span>
             </div>
           </div>
-          <div class="memo-item-sub-row">
-            <p class="memo-body-preview">${memo.body || ""}</p>
-            <span class="memo-timestamp">${formatShortDate(memo.timestamp)}</span>
+        </div>
+        ${
+          firstAmount !== null
+            ? `
+        <div class="memo-item-adjust ${isExpanded ? "expanded" : ""}" id="adjust-panel-${memo.id}">
+          <div class="memo-adjust-inner">
+            <span class="memo-adjust-current">¥${firstAmount.toLocaleString()}</span>
+            <div class="memo-btn-row">
+              <button type="button" class="adjust-btn" data-id="${memo.id}" data-delta="-1000">-1,000</button>
+              <button type="button" class="adjust-btn" data-id="${memo.id}" data-delta="-100">-100</button>
+              <button type="button" class="adjust-btn" data-id="${memo.id}" data-delta="+100">+100</button>
+              <button type="button" class="adjust-btn" data-id="${memo.id}" data-delta="+1000">+1,000</button>
+            </div>
           </div>
         </div>
+        `
+            : ""
+        }
       </div>
-      ${
-        firstAmount !== null
-          ? `
-      <div class="memo-item-adjust ${isExpanded ? "expanded" : ""}" id="adjust-panel-${memo.id}">
-        <div class="memo-adjust-inner">
-          <span class="memo-adjust-current">¥${firstAmount.toLocaleString()}</span>
-          <div class="memo-btn-row">
-            <button type="button" class="adjust-btn" data-id="${memo.id}" data-delta="-1000">-1,000</button>
-            <button type="button" class="adjust-btn" data-id="${memo.id}" data-delta="-100">-100</button>
-            <button type="button" class="adjust-btn" data-id="${memo.id}" data-delta="+100">+100</button>
-            <button type="button" class="adjust-btn" data-id="${memo.id}" data-delta="+1000">+1,000</button>
-          </div>
-        </div>
-      </div>
-      `
-          : ""
-      }
     `;
     memoListElement.appendChild(listItem);
   });
@@ -266,10 +285,155 @@ async function renderMemoList() {
     });
   });
 
+  // スワイプ削除ボタンのイベント登録
+  document.querySelectorAll(".memo-swipe-delete-btn").forEach((btn) => {
+    btn.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      const id = btn.dataset.id;
+      const memoItem = btn.closest(".memo-item");
+      if (!memoItem || !id) return;
+
+      // 削除アニメーション（高さを縮めてフェードアウト）
+      memoItem.classList.add("deleting");
+      openSwipedItem = null;
+
+      setTimeout(async () => {
+        await deleteMemo(id);
+        expandedAdjustMemoIds.delete(id);
+        selectedMemoIds.delete(id);
+        updateActionButton();
+        await renderMemoList();
+      }, 250);
+    });
+  });
+
+  // スワイプジェスチャーの登録（Pointer Events）
+  document.querySelectorAll(".memo-item").forEach((memoItem) => {
+    const itemBody = memoItem.querySelector(".memo-item-body");
+    if (!itemBody) return;
+
+    let startX = 0;
+    let startY = 0;
+    let currentX = 0;
+    let isDragging = false;
+    let hasMoved = false;
+    let startOffset = 0;
+
+    const onPointerDown = (e) => {
+      // ボタンやチェックボックス、入力要素の操作時はスワイプ開始しない
+      if (e.target.closest("button, input, a, .adjust-btn, .memo-swipe-delete-btn")) {
+        return;
+      }
+
+      // 他のアイテムが開いていたら閉じる
+      if (openSwipedItem && openSwipedItem !== itemBody) {
+        closeOpenSwipe();
+      }
+
+      startX = e.clientX;
+      startY = e.clientY;
+      currentX = e.clientX;
+      isDragging = true;
+      hasMoved = false;
+      startOffset = openSwipedItem === itemBody ? -80 : 0;
+      itemBody.style.transition = "none";
+    };
+
+    const onPointerMove = (e) => {
+      if (!isDragging) return;
+      currentX = e.clientX;
+      const dx = currentX - startX;
+      const dy = e.clientY - startY;
+
+      // 縦スクロールと判定されたらスワイプをキャンセル
+      if (!hasMoved && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) {
+        isDragging = false;
+        itemBody.style.transition = "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)";
+        itemBody.style.transform = openSwipedItem === itemBody ? "translateX(-80px)" : "translateX(0px)";
+        return;
+      }
+
+      if (Math.abs(dx) > 5) {
+        hasMoved = true;
+      }
+
+      if (hasMoved) {
+        let targetX = startOffset + dx;
+        // 右方向への移動は制限（最大0px）
+        if (targetX > 0) {
+          targetX = 0;
+        }
+        // -80pxを超える左への引っ張りには抵抗をつける
+        if (targetX < -80) {
+          const excess = targetX - (-80);
+          targetX = -80 + excess * 0.25;
+        }
+        itemBody.style.transform = `translateX(${targetX}px)`;
+      }
+    };
+
+    const onPointerUp = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      itemBody.style.transition = "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)";
+
+      if (hasMoved) {
+        isSwiping = true;
+        setTimeout(() => {
+          isSwiping = false;
+        }, 120);
+
+        const dx = currentX - startX;
+        if (startOffset === 0) {
+          // 閉じた状態から左へスワイプ
+          if (dx < -35) {
+            itemBody.style.transform = "translateX(-80px)";
+            openSwipedItem = itemBody;
+          } else {
+            itemBody.style.transform = "translateX(0px)";
+            openSwipedItem = null;
+          }
+        } else {
+          // 開いた状態から右へ戻すスワイプ
+          if (dx > 25) {
+            itemBody.style.transform = "translateX(0px)";
+            openSwipedItem = null;
+          } else {
+            itemBody.style.transform = "translateX(-80px)";
+            openSwipedItem = itemBody;
+          }
+        }
+      } else {
+        // 移動がなかった場合、元の状態を維持
+        itemBody.style.transform = openSwipedItem === itemBody ? "translateX(-80px)" : "translateX(0px)";
+      }
+    };
+
+    itemBody.addEventListener("pointerdown", onPointerDown);
+    itemBody.addEventListener("pointermove", onPointerMove);
+    itemBody.addEventListener("pointerup", onPointerUp);
+    itemBody.addEventListener("pointercancel", onPointerUp);
+  });
+
   document.querySelectorAll(".memo-item-content").forEach((contentDiv) => {
     contentDiv.addEventListener("click", async (event) => {
       // 金額バッジやマップボタンのクリック時は編集モーダルを開かない
       if (event.target.closest(".memo-amount-badge, .open-map-button")) {
+        return;
+      }
+      // スワイプ直後なら編集モーダルを開かない
+      if (isSwiping) {
+        return;
+      }
+      // スワイプオープン状態のアイテムをタップした時は、編集を開かずに閉じる
+      const itemBody = contentDiv.closest(".memo-item-body");
+      if (openSwipedItem === itemBody) {
+        closeOpenSwipe();
+        return;
+      }
+      // 他のアイテムが開いている場合も閉じるだけで編集モーダルは開かない
+      if (openSwipedItem) {
+        closeOpenSwipe();
         return;
       }
       const id = event.target.closest(".memo-item-content").dataset.id;
@@ -667,6 +831,23 @@ function stopQrScanning() {
     qrReaderContainer.classList.add("hidden");
   }
 }
+
+// スワイプオープン中の外側タップ・スクロールによる自動クローズ
+document.addEventListener("pointerdown", (event) => {
+  if (openSwipedItem && !event.target.closest(".memo-item")) {
+    closeOpenSwipe();
+  }
+});
+
+window.addEventListener(
+  "scroll",
+  () => {
+    if (openSwipedItem) {
+      closeOpenSwipe();
+    }
+  },
+  { passive: true },
+);
 
 // Initial render
 renderMemoList();
