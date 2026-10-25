@@ -29,6 +29,7 @@ if ("serviceWorker" in navigator) {
 const actionButton = document.getElementById("action-button");
 const exportButton = document.getElementById("export-button");
 const sendButton = document.getElementById("send-button");
+const statusDot = document.getElementById("connection-status-dot");
 const settingsButton = document.getElementById("settings-button");
 const settingsPopup = document.getElementById("settings-popup");
 const cancelSettingsButton = document.getElementById("cancel-settings");
@@ -643,14 +644,113 @@ function setServerUrl(url) {
   return cleanUrl;
 }
 
-// Direct send to ExpenditureBook
-sendButton.addEventListener("click", async () => {
+// --- Connection & Health Check Management ---
+let connectionState = "offline"; // 'offline' | 'checking' | 'online' | 'queued'
+let healthCheckTimer = null;
+let isSending = false;
+
+function updateConnectionStatus(newState) {
+  connectionState = newState;
+  if (!statusDot) return;
+
+  statusDot.className = `status-dot ${newState}`;
+
+  if (newState === "online") {
+    sendButton.title = "ExpenditureBookへ直接送信 (接続完了)";
+  } else if (newState === "queued") {
+    sendButton.title = "接続待機中 (マシン起動後に自動送信)";
+  } else if (newState === "checking") {
+    sendButton.title = "接続確認中...";
+  } else {
+    sendButton.title = "ExpenditureBookへ直接送信 (未接続 - タップで起動時自動送信を予約)";
+  }
+}
+
+async function checkHealth({ silent = true } = {}) {
+  const serverUrl = getServerUrl();
+  const endpoint = `${serverUrl}/api/health`;
+
+  if (connectionState !== "queued") {
+    updateConnectionStatus("checking");
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+    const res = await fetch(endpoint, {
+      method: "GET",
+      cache: "no-store",
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const wasQueued = connectionState === "queued";
+      updateConnectionStatus("online");
+      if (wasQueued) {
+        showToast("⚡ マシン接続を確認しました！支出データを自動送信します...", "info", 3000);
+        executeSendExpenditures();
+      }
+      return true;
+    } else {
+      if (connectionState !== "queued") {
+        updateConnectionStatus("offline");
+      }
+      return false;
+    }
+  } catch (err) {
+    if (connectionState !== "queued") {
+      updateConnectionStatus("offline");
+    }
+    return false;
+  }
+}
+
+function scheduleHealthCheck() {
+  if (healthCheckTimer) clearTimeout(healthCheckTimer);
+
+  // 画面が非表示の時はポーリングを停止して省電力
+  if (document.hidden) return;
+
+  // 状態に応じたインターバル (queued: 2秒, offline/checking: 3秒, online: 30秒)
+  let nextInterval = 30000;
+  if (connectionState === "queued") {
+    nextInterval = 2000;
+  } else if (connectionState === "offline" || connectionState === "checking") {
+    nextInterval = 3000;
+  }
+
+  healthCheckTimer = setTimeout(async () => {
+    await checkHealth();
+    scheduleHealthCheck();
+  }, nextInterval);
+}
+
+// 画面復帰時の自動再開
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
+    checkHealth().finally(() => {
+      scheduleHealthCheck();
+    });
+  } else {
+    if (healthCheckTimer) clearTimeout(healthCheckTimer);
+  }
+});
+
+// 支出送信本体処理
+async function executeSendExpenditures() {
+  if (isSending) return;
+  isSending = true;
+
   const allMemos = await getMemos();
   const memos = allMemos.filter(
     (memo) => Number(memo.category ?? 0) === 0
   );
   if (memos.length === 0) {
     showToast("送信対象（金額）のメモがありません。", "error");
+    isSending = false;
+    updateConnectionStatus("online");
     return;
   }
 
@@ -674,7 +774,7 @@ sendButton.addEventListener("click", async () => {
   const serverUrl = getServerUrl();
   const endpoint = `${serverUrl}/api/import`;
 
-  showToast(`送信中: ${endpoint}`, "info", 3000);
+  showToast(`送信中: ${exportData.length}件の支出を送信しています...`, "info", 3000);
 
   try {
     const controller = new AbortController();
@@ -693,6 +793,7 @@ sendButton.addEventListener("click", async () => {
 
     if (response.ok) {
       const result = await response.json();
+      updateConnectionStatus("online");
       showToast(`🚀 ${result.count || exportData.length}件の支出を送信しました！`, "success", 4000);
     } else {
       throw new Error(`HTTP ${response.status} (${response.statusText || 'エラー'})`);
@@ -703,8 +804,57 @@ sendButton.addEventListener("click", async () => {
       ? 'タイムアウト (8秒): サーバーに繋がりません' 
       : `${error.message || error}`;
     showToast(`送信失敗: ${errMsg}`, "error", 6000);
+    updateConnectionStatus("offline");
+  } finally {
+    isSending = false;
+    scheduleHealthCheck();
+  }
+}
+
+// 送信ボタンのクリックイベント (即時送信 or キューイング)
+sendButton.addEventListener("click", async () => {
+  if (isSending) return;
+
+  const allMemos = await getMemos();
+  const memos = allMemos.filter(
+    (memo) => Number(memo.category ?? 0) === 0
+  );
+  if (memos.length === 0) {
+    showToast("送信対象（金額）のメモがありません。", "error");
+    return;
+  }
+
+  // すでにキュー待ち中の場合は再度案内
+  if (connectionState === "queued") {
+    showToast("📡 すでに接続待ちキューに入っています。マシン起動後に自動送信されます。", "info", 4000);
+    return;
+  }
+
+  // オンラインの場合は即座に送信
+  if (connectionState === "online") {
+    await executeSendExpenditures();
+    return;
+  }
+
+  // オフラインまたはチェック中の場合は、直ちにヘルスチェックを1回試行
+  showToast("🔍 接続確認中...", "info", 1500);
+  const isOnline = await checkHealth();
+  if (isOnline) {
+    await executeSendExpenditures();
+  } else {
+    // 繋がらなかった場合はキューに入れてマシン起動待機
+    updateConnectionStatus("queued");
+    showToast(`📡 マシン接続待機中: 起動を検知次第、${memos.length}件を自動送信します`, "info", 5000);
+    scheduleHealthCheck();
   }
 });
+
+// 初回起動時チェック
+setTimeout(() => {
+  checkHealth().finally(() => {
+    scheduleHealthCheck();
+  });
+}, 300);
 
 // Settings Dialog
 settingsButton.addEventListener("click", () => {
@@ -724,6 +874,10 @@ settingsForm.addEventListener("submit", (e) => {
   stopQrScanning();
   settingsPopup.classList.remove("visible");
   showToast(`接続先を保存しました: ${savedUrl}`, "success");
+  // 保存後に新しい接続先で即ヘルスチェック
+  checkHealth().finally(() => {
+    scheduleHealthCheck();
+  });
 });
 
 pasteUrlBtn.addEventListener("click", async () => {
@@ -745,29 +899,34 @@ testConnectionBtn.addEventListener("click", async () => {
   if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
     cleanUrl = `http://${cleanUrl}`;
   }
-  const testEndpoint = `${cleanUrl}/api/import`;
+  const testEndpoint = `${cleanUrl}/api/health`;
 
   showToast(`接続テスト中: ${testEndpoint}`, "info", 3000);
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
 
     const res = await fetch(testEndpoint, {
       method: "GET",
+      cache: "no-store",
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
 
     if (res.ok) {
+      updateConnectionStatus("online");
+      scheduleHealthCheck();
       showToast("✅ 接続成功！サーバーと通信できました", "success", 4000);
     } else {
       showToast(`⚠️ 応答あり (HTTP ${res.status})`, "info", 4000);
     }
   } catch (err) {
     console.error("Test connection failed:", err);
+    updateConnectionStatus("offline");
+    scheduleHealthCheck();
     const reason = err.name === 'AbortError' ? 'タイムアウト' : (err.message || '通信エラー');
-    showToast(`❌ 接続失敗 (${reason})。SSL証明書かURLを確認してください`, "error", 6000);
+    showToast(`❌ 接続失敗 (${reason})。マシン起動状態やTailscale、URLを確認してください`, "error", 6000);
   }
 });
 
