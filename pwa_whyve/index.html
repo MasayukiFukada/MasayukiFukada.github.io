@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whyve Memo - 不便さクイック記録</title>
+  <link rel="stylesheet" href="./style.css?v=20261025202000" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" href="./icons/icon-192x192.png" />
+  <link rel="apple-touch-icon" href="./icons/icon-192x192.png" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-title" content="Whyve Memo" />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+  />
+</head>
+<body>
+  <header>
+    <div class="header-title-group">
+      <h1>Whyve Memo</h1>
+      <span class="header-subtitle">日常の不便さを逃さず記録</span>
+    </div>
+    <div class="header-actions">
+      <button
+        id="send-button"
+        class="header-button has-status"
+        title="Whyveへ直接送信 (未接続)"
+      >
+        <span class="material-icons">send</span>
+        <span id="connection-status-dot" class="status-dot offline"></span>
+      </button>
+      <button
+        id="export-button"
+        class="header-button"
+        title="クリップボードにJSONコピー"
+      >
+        <span class="material-icons">content_copy</span>
+      </button>
+      <button
+        id="settings-button"
+        class="header-button"
+        title="連携・ペアリング設定"
+      >
+        <span class="material-icons">settings</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div id="filter-bar" class="filter-bar">
+      <button id="filter-all" class="filter-chip active">すべて</button>
+      <button id="filter-unsent" class="filter-chip">未送信のみ</button>
+    </div>
+    <ul id="memo-list" class="memo-list"></ul>
+    <div id="empty-state" class="empty-state hidden">
+      <span class="material-icons empty-icon">lightbulb_outline</span>
+      <p class="empty-text">不便さや違和感をメモしてみましょう</p>
+      <p class="empty-subtext">右下の「＋」ボタンから素早く登録できます</p>
+    </div>
+  </main>
+
+  <button class="fab" id="action-button" title="不便さをメモする">
+    <span class="material-icons">add</span>
+  </button>
+
+  <!-- 不便さ登録・編集モーダル -->
+  <div id="memo-popup" class="popup-overlay">
+    <div class="popup-content">
+      <h2 id="popup-title">不便さを記録</h2>
+      <form id="memo-form">
+        <label for="memo-title">タイトル <span class="required">*</span>:</label>
+        <input
+          type="text"
+          id="memo-title"
+          placeholder="例: 改札でICカードが反応しづらかった"
+          required
+        />
+
+        <label>深刻度 (困り度):</label>
+        <div id="memo-severity-radio" class="severity-radio-group">
+          <input
+            type="radio"
+            id="severity-1"
+            name="memo-severity"
+            value="1"
+          />
+          <label for="severity-1" class="severity-label severity-low">
+            <span class="emoji">😐</span>
+            <span class="label-text">ちょっと不便</span>
+          </label>
+
+          <input
+            type="radio"
+            id="severity-2"
+            name="memo-severity"
+            value="2"
+            checked
+          />
+          <label for="severity-2" class="severity-label severity-med">
+            <span class="emoji">😣</span>
+            <span class="label-text">割と困る</span>
+          </label>
+
+          <input
+            type="radio"
+            id="severity-3"
+            name="memo-severity"
+            value="3"
+          />
+          <label for="severity-3" class="severity-label severity-high">
+            <span class="emoji">😫</span>
+            <span class="label-text">激しくストレス</span>
+          </label>
+        </div>
+
+        <label for="memo-body">状況・詳細メモ:</label>
+        <textarea
+          id="memo-body"
+          placeholder="何が起きたか、どんな不都合があったか"
+          rows="3"
+        ></textarea>
+
+        <div class="location-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="memo-use-gps" />
+            <span class="material-icons location-icon">place</span>
+            <span>現在地（GPS）を記録する</span>
+          </label>
+          <span id="gps-status" class="gps-status-text"></span>
+        </div>
+
+        <label for="memo-timestamp">記録日時:</label>
+        <input type="datetime-local" id="memo-timestamp" />
+
+        <div class="form-actions">
+          <button type="submit" class="primary-button">保存</button>
+          <button type="button" id="cancel-memo" class="secondary-button">
+            キャンセル
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 連携設定モーダル -->
+  <div id="settings-popup" class="popup-overlay">
+    <div class="popup-content">
+      <h2>連携設定 (Whyve PC)</h2>
+      <p class="settings-desc">
+        PCのWhyve起動時に表示されるURLやQRコードを設定してください。
+      </p>
+      <form id="settings-form">
+        <label for="server-url-input">WhyveサーバーURL:</label>
+        <input
+          type="url"
+          id="server-url-input"
+          placeholder="http://whyve.local:3000"
+          required
+        />
+        <div class="settings-helper-buttons">
+          <button type="button" id="paste-url-btn" class="secondary-button">
+            <span class="material-icons">content_paste</span> 貼付
+          </button>
+          <button type="button" id="scan-qr-btn" class="secondary-button">
+            <span class="material-icons">qr_code_scanner</span> QR
+          </button>
+          <button type="button" id="test-connection-btn" class="secondary-button">
+            <span class="material-icons">network_check</span> 接続確認
+          </button>
+        </div>
+
+        <div id="qr-reader-container" class="qr-reader-container hidden">
+          <video id="qr-video" playsinline></video>
+          <button type="button" id="stop-qr-btn" class="danger-button">
+            スキャン停止
+          </button>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-button">保存</button>
+          <button type="button" id="cancel-settings" class="secondary-button">
+            閉じる
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="./db.js?v=20261025202000" defer></script>
+  <script src="./app.js?v=20261025202000" defer></script>
+</body>
+</html>
